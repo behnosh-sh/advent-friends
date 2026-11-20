@@ -53,35 +53,6 @@
     return skapaSlump(Math.floor(Math.random() * 4294967296));
   }
 
-  // Kopierar text till urklipp. Knappen (valfri) visar "Kopierat!" en stund.
-  function kopieraResultat(text, knapp) {
-    function klart(ok) {
-      if (!knapp) return;
-      var gammal = knapp.dataset.text || knapp.textContent;
-      knapp.dataset.text = gammal;
-      knapp.textContent = ok ? 'Copied! Paste it in Signal' : 'Couldn’t copy';
-      setTimeout(function () { knapp.textContent = gammal; }, 2500);
-    }
-    function reserv() {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-      document.body.removeChild(ta);
-      klart(ok);
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function () { klart(true); }, reserv);
-    } else {
-      reserv();
-    }
-  }
-
   // Formaterar sekunder som 3:07 eller 1:02:07.
   function formateraTid(sek) {
     sek = Math.max(0, Math.round(sek));
@@ -262,7 +233,6 @@
     skapaSlump: skapaSlump,
     dagensSlump: dagensSlump,
     nySlump: nySlump,
-    kopieraResultat: kopieraResultat,
     formateraTid: formateraTid,
     lasa: lasa,
     spara: spara,
