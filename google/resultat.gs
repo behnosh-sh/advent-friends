@@ -39,7 +39,6 @@ function installera() {
   if (!ark.getSheetByName(FLIK_RESULTAT)) ark.insertSheet(FLIK_RESULTAT).appendRow(KOLUMNER);
   if (!ark.getSheetByName(FLIK_FAMILJEN)) ark.insertSheet(FLIK_FAMILJEN).appendRow(KOLUMNER);
 }
-}
 
 // Sidan skickar allt som POST med JSON i kroppen (text/plain, så att webbläsaren inte gör en förfrågan i förväg).
 function doPost(e) {
