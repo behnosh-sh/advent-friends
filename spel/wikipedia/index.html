@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Wikipedia Game</title>
+<meta name="theme-color" content="#14233F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../css/gemensam.css?v=7">
+<style>
+  h1 { margin: 4px 0 2px; font-size: 30px; line-height: 1.1; }
+  .under { margin: 0 0 16px; color: var(--accent); font-size: 14px; }
+  .ovning { display: inline-block; margin-left: 6px; padding: 2px 10px; border-radius: 999px; background: var(--glod); color: var(--text); font-size: 14px; vertical-align: middle; }
+
+  .resa { display: grid; gap: 10px; margin-bottom: 16px; }
+  .artikel { display: flex; gap: 12px; align-items: center; }
+  .artikel .bild { flex: none; width: 56px; height: 56px; border-radius: 14px; background: var(--oppnad) center / cover no-repeat; }
+  .artikel .etikett { font-size: 14px; color: var(--dampad); }
+  .artikel .namn { font: 600 18px var(--text-typsnitt); line-height: 1.15; overflow-wrap: anywhere; }
+  .artikel .besk { font-size: 14px; color: var(--dampad); line-height: 1.25; }
+  .pil { text-align: center; font-size: 22px; color: var(--gron); line-height: 1; }
+
+  .knappar { display: grid; gap: 12px; margin: 16px 0; }
+
+  .regler h2 { margin: 0 0 6px; font-size: 18px; }
+  .regler ol { margin: 0; padding-left: 22px; line-height: 1.45; }
+  .regler b { font-weight: 600; }
+  .liten { font-size: 14px; color: var(--himmel-dampad); text-align: center; margin: 10px 0 0; }
+
+  .skicka { display: grid; gap: 10px; margin-bottom: 16px; }
+  .skicka h2 { margin: 0; font-size: 18px; }
+  .skicka label { font-weight: 600; }
+  .skicka textarea { font: inherit; font-size: 14px; color: var(--text); border: 2px solid var(--kant); border-radius: 14px; padding: 10px; background: var(--kort); resize: vertical; min-height: 110px; }
+  .skicka .last { margin: 0; font-size: 14px; color: var(--dampad); }
+  .skicka .last b { color: var(--text); }
+  .skicka .fel { margin: 0; font-size: 14px; color: var(--fel, #A23B2A); }
+  .skicka .fel:empty, .skicka .last:empty { display: none; }
+  .tavla { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<main class="spalt">
+  <a class="tillbaka" href="../../">← Calendar</a>
+  <h1>The Wikipedia Game <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
+  <p class="under" id="under"></p>
+
+  <div class="resa kort">
+    <div class="artikel">
+      <div class="bild" id="startbild"></div>
+      <div>
+        <div class="etikett">Start</div>
+        <div class="namn" id="startnamn"></div>
+        <div class="besk" id="startbesk"></div>
+      </div>
+    </div>
+    <div class="pil" aria-hidden="true">↓</div>
+    <div class="artikel">
+      <div class="bild" id="malbild"></div>
+      <div>
+        <div class="etikett">Goal</div>
+        <div class="namn" id="malnamn"></div>
+        <div class="besk" id="malbesk"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="knappar">
+    <a class="knapp" id="spela" target="_blank" rel="noopener">Play</a>
+  </div>
+
+  <div class="skicka kort" id="skicka" hidden>
+    <h2>Your result</h2>
+    <label for="inklistrat">Paste your Share Run Summary</label>
+    <textarea id="inklistrat" placeholder="WikiSpeedruns&#10;Pizza -> Santa Claus&#10;5 🖱️&#10;72.4 ⏱️"></textarea>
+    <p class="last" id="last"></p>
+    <p class="fel" id="skickafel"></p>
+    <button class="knapp" id="skickaknapp" type="button" disabled>Send to the group</button>
+    <button class="knapp diskret" id="gavupp" type="button">I give up, show the results</button>
+    <p class="liten">Only your first result counts.</p>
+  </div>
+
+  <section id="tavla"></section>
+
+  <details class="regler kort">
+    <summary><h2>How to play</h2></summary>
+    <ol>
+      <li>Tap <b>Play</b>. The game opens on Wikispeedruns (no account needed).</li>
+      <li>Get from the start article to the goal by clicking only links inside the articles. Clicks and time are counted automatically.</li>
+      <li>When you get there, tap <b>Share Run Summary</b>, come back here and paste the result.</li>
+    </ol>
+  </details>
+
+  <div class="knappar">
+    <button class="knapp diskret" id="igen" type="button">Practice</button>
+  </div>
+  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Back to today’s route</a></p>
+</main>
+
+<script src="../../js/gemensam.js?v=6"></script>
+<script src="../../js/luckor.js?v=27"></script>
+<script src="../../js/resultat.js?v=4"></script>
+<script>
+(function () {
+  // Handplockade par på engelska Wikipedia som går att klara på några minuter.
+  // Dagens par väljs med dagens frö, så alla i familjen får samma bana.
+  var PAR = [
+    ['Pizza', 'Santa Claus'],
+    ['IKEA', 'Christmas tree'],
+    ['ABBA', "Saint Lucy's Day"],
+    ['Penguin', 'Reindeer'],
+    ['Minecraft', 'Gingerbread'],
+    ['Moomins', 'Snowman'],
+    ['Banana', 'Mulled wine'],
+    ['Lego', 'Advent calendar'],
+    ['Volcano', 'Aurora'],
+    ['Coffee', 'Saffron'],
+    ['Tyrannosaurus', 'Polar bear'],
+    ['Eiffel Tower', 'Christmas market'],
+    ['Chess', 'Krampus'],
+    ['Pippi Longstocking', 'Donald Duck'],
+    ['Octopus', 'Candy cane'],
+    ['Mount Everest', 'Snowflake'],
+    ['Super Mario', 'Home Alone'],
+    ['Vikings', 'Yule goat'],
+    ['Honey bee', 'Mistletoe'],
+    ['Stockholm', 'Rudolph the Red-Nosed Reindeer']
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var dag = Advent.hamtaDag() || 2;
+  var dagensIndex = Math.floor(Advent.dagensSlump(dag)() * PAR.length);
+  Advent.markeraOppnad(dag);
+
+  function spelAdress(start, mal) {
+    return 'https://wikispeedruns.com/play/quick_play?prompt_start=' + encodeURIComponent(start) +
+      '&prompt_end=' + encodeURIComponent(mal) + '&lang=en';
+  }
+
+  // Kort beskrivning och bild från Wikipedia. Går det inte att hämta blir det bara tomt.
+  function hamtaSammanfattning(titel, bildId, beskId) {
+    $(beskId).textContent = '';
+    $(bildId).style.backgroundImage = '';
+    if (!window.fetch) return;
+    fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(titel.replace(/ /g, '_')))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        if (d.description) $(beskId).textContent = d.description;
+        if (d.thumbnail && d.thumbnail.source) $(bildId).style.backgroundImage = 'url("' + d.thumbnail.source + '")';
+      })
+      .catch(function () {});
+  }
+
+  function visa(index, ovning) {
+    var start = PAR[index][0], mal = PAR[index][1];
+    $('under').textContent = ovning ? 'Practice route' : 'Day ' + dag;
+    $('ovningsmarke').hidden = !ovning;
+    $('tillDagens').hidden = !ovning;
+    $('startnamn').textContent = start;
+    $('malnamn').textContent = mal;
+    $('spela').href = spelAdress(start, mal);
+    hamtaSammanfattning(start, 'startbild', 'startbesk');
+    hamtaSammanfattning(mal, 'malbild', 'malbesk');
+  }
+
+  var aktuellt = dagensIndex;
+  $('igen').addEventListener('click', function () {
+    var slump = Advent.nySlump(), ny;
+    do { ny = Math.floor(slump() * PAR.length); } while (ny === aktuellt || ny === dagensIndex);
+    aktuellt = ny;
+    visa(ny, true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  $('tillDagensLank').addEventListener('click', function (e) {
+    e.preventDefault();
+    aktuellt = dagensIndex;
+    visa(dagensIndex, false);
+  });
+
+  visa(dagensIndex, false);
+
+  // Gemensamma resultat. Bara dagens bana räknas, inte övningsbanor.
+  var lastResultat = null, harSpelat = true;
+  function visaSkicka() {
+    $('skicka').hidden = harSpelat || aktuellt !== dagensIndex;
+  }
+  Advent.Resultat.tavla($('tavla'), dag, {
+    vidStatus: function (d) {
+      harSpelat = !d || d.harSpelat;
+      visaSkicka();
+    }
+  });
+  $('igen').addEventListener('click', visaSkicka);
+  $('tillDagensLank').addEventListener('click', visaSkicka);
+
+  // Plockar ut klick och tid ur Wikispeedruns delningstext:
+  // "WikiSpeedruns\nStart -> Mål\n5 🖱️\n72.4 ⏱️\nhttps://wikispeedruns.com/play/quick_play?..."
+  function normalisera(t) {
+    try { t = decodeURIComponent(t); } catch (e) {}
+    return t.replace(/_/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+  function lasDelning(text) {
+    var klick = text.match(/(\d+)\s*🖱/);
+    var tid = text.match(/(\d+(?:\.\d+)?)\s*⏱/);
+    if (!klick || !tid) return { fel: 'Can’t find the clicks and time. Paste the whole text from Share Run Summary.' };
+    var start = PAR[dagensIndex][0], mal = PAR[dagensIndex][1];
+    var lank = text.match(/prompt_start=([^&\s]+)&prompt_end=([^&\s]+)/);
+    var rad = text.match(/^(.+?)\s*->\s*(.+)$/m);
+    var par = lank ? [lank[1], lank[2]] : rad ? [rad[1], rad[2]] : null;
+    if (!par || normalisera(par[0]) !== normalisera(start) || normalisera(par[1]) !== normalisera(mal)) {
+      return { fel: 'This doesn’t look like today’s route (' + start + ' → ' + mal + ').' };
+    }
+    var k = parseInt(klick[1], 10), s = parseFloat(tid[1]);
+    return { klick: k, sek: s, text: k + ' clicks · ' + Advent.formateraTid(s) };
+  }
+
+  $('inklistrat').addEventListener('input', function () {
+    var t = $('inklistrat').value.trim();
+    $('skickafel').textContent = '';
+    $('last').textContent = '';
+    lastResultat = null;
+    if (t) {
+      var r = lasDelning(t);
+      if (r.fel) $('skickafel').textContent = r.fel;
+      else {
+        lastResultat = r;
+        $('last').textContent = 'We read: ';
+        $('last').appendChild(document.createElement('b')).textContent = r.text;
+      }
+    }
+    $('skickaknapp').disabled = !lastResultat;
+  });
+
+  function skicka(resultat) {
+    $('skickaknapp').disabled = true;
+    $('gavupp').disabled = true;
+    $('skickafel').textContent = '';
+    Advent.Resultat.skicka(resultat).then(function () {
+      $('tavla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, function (fel) {
+      $('skickafel').textContent = fel.message;
+      $('skickaknapp').disabled = !lastResultat;
+      $('gavupp').disabled = false;
+    });
+  }
+  $('skickaknapp').addEventListener('click', function () {
+    if (!lastResultat) return;
+    skicka({
+      dag: dag, spel: 'wikipedia', status: 'klar', medalj: '',
+      varde: lastResultat.klick * 100000 + Math.round(lastResultat.sek * 10),
+      text: lastResultat.text
+    });
+  });
+  $('gavupp').addEventListener('click', function () {
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
+      .then(function (ok) {
+        if (!ok) return;
+        skicka({ dag: dag, spel: 'wikipedia', status: 'gav upp', medalj: '', text: '' });
+      });
+  });
+})();
+</script>
+</body>
+</html>

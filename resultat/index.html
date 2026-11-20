@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Results</title>
+<meta name="theme-color" content="#14233F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../css/gemensam.css?v=7">
+<style>
+  h1 { margin: 4px 0 2px; font-size: 30px; line-height: 1.1; }
+  .under { margin: 0 0 16px; color: var(--himmel-dampad); font-size: 14px; }
+  #status { color: var(--himmel-dampad); }
+  /* En rad per lucka. Spelade luckor går att fälla ut. */
+  .dag { padding: 0; }
+  .dag:last-child { border-bottom: 1px solid rgba(255,255,255,.14); }
+  .dag > summary, .dag > .huvud { list-style: none; display: flex; align-items: center; gap: 10px; padding: 13px 2px; text-decoration: none; color: inherit; }
+  .dag > summary { cursor: pointer; }
+  .dag > summary::-webkit-details-marker { display: none; }
+  .dag .nr { width: 24px; flex: none; color: var(--himmel-dampad); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .dag .titel { flex: 1; min-width: 0; font-weight: 600; }
+  .dag .kort-svar { font-size: 14px; color: var(--himmel-dampad); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
+  .dag .kort-svar b { color: var(--himmel-text); font-weight: 600; }
+  .dag.last .titel { color: var(--himmel-dampad); font-weight: 400; }
+  .dag.last .kort-svar { text-decoration: underline; text-underline-offset: 3px; }
+  .dag[open] > summary .kort-svar { visibility: hidden; }
+  .dag .tavla-lista { padding: 0 0 10px 34px; }
+  .tavla-rad { padding: 7px 0; }
+  #kodruta { margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<main class="spalt">
+  <a class="tillbaka" href="../">← Calendar</a>
+  <h1>Results</h1>
+  <p class="under">Tap a day to see the whole scoreboard.</p>
+  <section id="kodruta" hidden></section>
+  <p class="tavla-info" id="status">Loading…</p>
+  <div class="dagar" id="dagar"></div>
+  <p class="tavla-vem" id="vem" hidden></p>
+</main>
+
+<script src="../js/gemensam.js?v=6"></script>
+<script src="../js/luckor.js?v=27"></script>
+<script src="../js/resultat.js?v=4"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  // Samma regel som startsidan: bara luckor t.o.m. dagens datum (js/luckor.js).
+  var nu = new Date();
+  var idag = window.oppnaTill(nu);
+  function synlig(n) { return window.LUCKOR[n] && (window.ALLA_OPPNA || n <= idag); }
+
+  function el(tagg, klass, text) {
+    var e = document.createElement(tagg);
+    if (klass) e.className = klass;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  // Kort sammanfattning till höger på raden: vinnaren och dennes resultat.
+  function sammanfattning(n, d, svar) {
+    var rader = Advent.Resultat.ordna(n, d, svar.spelare);
+    var forst = rader.filter(function (r) { return r.status === 'klar'; })[0];
+    var span = el('span', 'kort-svar');
+    if (!forst) { span.textContent = d.antal + ' of ' + svar.spelare.length + ' have played'; return span; }
+    var medalj = { guld: '🥇 ', silver: '🥈 ', brons: '🥉 ' }[forst.medalj] || '';
+    span.appendChild(document.createTextNode(medalj));
+    span.appendChild(el('b', null, forst.spelare));
+    span.appendChild(document.createTextNode(' ' + forst.text));
+    return span;
+  }
+
+  function rita(svar) {
+    $('status').hidden = true;
+    var lista = $('dagar');
+    lista.textContent = '';
+    var visade = 0;
+    for (var n = 23; n >= 1; n--) {
+      if (!synlig(n)) continue;
+      var d = svar.dagar[n];
+      var titel = window.LUCKOR[n].titel;
+      var rad;
+      if (d.harSpelat) {
+        rad = el('details', 'dag kort');
+        var sum = el('summary');
+        sum.appendChild(el('span', 'nr', String(n)));
+        sum.appendChild(el('span', 'titel', titel));
+        sum.appendChild(sammanfattning(n, d, svar));
+        rad.appendChild(sum);
+        var ol = el('ol', 'tavla-lista');
+        Advent.Resultat.ritaRader(ol, n, d, svar.spelare, svar.namn);
+        rad.appendChild(ol);
+      } else {
+        // Andras resultat syns först när man själv har spelat.
+        rad = el('div', 'dag kort last');
+        var lank = el('a', 'huvud');
+        lank.href = '../' + window.LUCKOR[n].sokvag + '?dag=' + n;
+        lank.appendChild(el('span', 'nr', String(n)));
+        lank.appendChild(el('span', 'titel', titel));
+        lank.appendChild(el('span', 'kort-svar', '🔒 play first'));
+        rad.appendChild(lank);
+      }
+      lista.appendChild(rad);
+      visade++;
+    }
+    if (!visade) { $('status').hidden = false; $('status').textContent = 'No days are open yet.'; }
+    $('vem').hidden = false;
+    $('vem').textContent = 'You’re ' + svar.namn + ' · ';
+    var byt = el('button', 'lanklik', 'Switch person');
+    byt.type = 'button';
+    byt.addEventListener('click', function () { Advent.Resultat.glomKod(); location.reload(); });
+    $('vem').appendChild(byt);
+  }
+
+  function ladda() {
+    if (!Advent.Resultat.arInkopplad()) { $('status').textContent = 'The scoreboard isn’t connected yet.'; return; }
+    if (!Advent.Resultat.kod()) { visaKodruta(); return; }
+    Advent.Resultat.alla().then(rita, function (fel) {
+      if (!Advent.Resultat.kod()) { visaKodruta(); return; }
+      $('status').textContent = fel.message;
+    });
+  }
+
+  // Samma kodruta som i luckorna. Tavlan för lucka 1 används bara för att logga in, sedan laddas sidan om.
+  function visaKodruta() {
+    $('status').hidden = true;
+    $('kodruta').hidden = false;
+    Advent.Resultat.tavla($('kodruta'), 1, {
+      vidStatus: function (d) { if (d) location.reload(); }
+    });
+    $('kodruta').querySelector('h2').textContent = 'Who are you?';
+  }
+
+  ladda();
+})();
+</script>
+</body>
+</html>
