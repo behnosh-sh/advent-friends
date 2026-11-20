@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mönsterdagen</title>
+<title>Pattern Day</title>
 <meta name="theme-color" content="#14233F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,18 +88,18 @@
 <body>
 <main class="spalt">
   <a class="tillbaka" href="../../">← Calendar</a>
-  <h1>Mönsterdagen <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
+  <h1>Pattern Day <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
   <p class="under" id="under"></p>
 
   <div class="start kort" id="start" hidden>
-    <p>Fem serier som blir svårare och svårare. Hitta mönstret och välj det som kommer härnäst. Flest rätt vinner, och vid lika vinner den snabbaste.</p>
-    <button class="knapp" id="startknapp" type="button">Starta</button>
+    <p>Five series that get harder and harder. Find the pattern and pick what comes next. Most correct wins, and in a tie the fastest wins.</p>
+    <button class="knapp" id="startknapp" type="button">Start</button>
   </div>
 
   <section id="spel" hidden>
     <div class="topp">
       <div class="prickar" id="prickar" aria-hidden="true"></div>
-      <div class="klocka" id="klocka" aria-label="Tid">0:00</div>
+      <div class="klocka" id="klocka" aria-label="Time">0:00</div>
     </div>
 
     <div class="serie-kort kort" id="serieKort">
@@ -108,15 +108,15 @@
       <div class="val" id="val"></div>
       <div class="forklaring" id="forklaring" hidden>
         <p class="omdome" id="omdome" aria-live="polite"></p>
-        <p class="varfor"><b>Mönstret</b><span id="varfor"></span></p>
+        <p class="varfor"><b>The pattern</b><span id="varfor"></span></p>
         <button class="knapp" id="nasta" type="button"></button>
       </div>
     </div>
   </section>
 
   <div class="slut kort" id="slut" hidden>
-    <h2>Resultat</h2>
-    <p class="poang"><span id="antalRatt"></span> <small>av 5 rätt</small></p>
+    <h2>Result</h2>
+    <p class="poang"><span id="antalRatt"></span> <small>of 5 correct</small></p>
     <p class="rutor" id="rutor"></p>
     <p id="sluttid"></p>
     <p id="sluttext"></p>
@@ -124,7 +124,7 @@
   </div>
 
   <div class="knappar" id="gavuppRuta" hidden>
-    <button class="knapp diskret" id="gavupp" type="button">Jag ger upp, visa resultaten</button>
+    <button class="knapp diskret" id="gavupp" type="button">I give up, show the results</button>
   </div>
 
   <section id="tavla"></section>
@@ -132,18 +132,18 @@
   <details class="regler kort">
     <summary><h2>How to play</h2></summary>
     <ol>
-      <li>Du får fem serier, en i taget: tal, bokstäver eller figurer. Den sista är en ruta med 3×3 figurer där den nedre högra saknas.</li>
-      <li>Hitta mönstret och tryck på det av de fyra alternativen som kommer härnäst. Du har ett försök per serie.</li>
-      <li>Efter varje svar ser du om det blev rätt och vad mönstret var. Klockan står still medan du läser.</li>
-      <li>Flest rätt vinner. Vid lika antal rätt vinner den som var snabbast. Guld för 5 rätt, silver för 4, brons för 3.</li>
+      <li>You get five series, one at a time: numbers, letters or shapes. The last one is a 3×3 grid of shapes where the bottom right one is missing.</li>
+      <li>Find the pattern and tap the one of the four options that comes next. You get one try per series.</li>
+      <li>After each answer you see whether you were right and what the pattern was. The clock stops while you read.</li>
+      <li>Most correct wins. In a tie, the fastest wins. Gold for 5 correct, silver for 4, bronze for 3.</li>
     </ol>
-    <p class="liten">Bara ditt första försök på dagens serier räknas.</p>
+    <p class="liten">Only your first try at today’s series counts.</p>
   </details>
 
   <div class="knappar">
     <button class="knapp diskret" id="igen" type="button">Practice</button>
   </div>
-  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Tillbaka till dagens serier</a></p>
+  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Back to today’s series</a></p>
 </main>
 
 <script src="../../js/gemensam.js?v=6"></script>
@@ -157,89 +157,89 @@
 
   // Exempel och övningsserier som får visas. Används som övning och som dagens serier innan tävlingen börjar.
   var TESTSET = [
-    [1, 'text', ['2', '6', '12', '20', '30'], ['42', '40', '44', '36'], 'Skillnaden ökar med 2 varje gång: +4, +6, +8, +10 och sedan +12.'],
-    [1, 'text', ['5', '10', '20', '40', '80'], ['160', '120', '100', '140'], 'Dubbelt så mycket varje gång: 80 · 2 = 160.'],
-    [1, 'text', ['1', '3', '6', '10', '15'], ['21', '20', '18', '25'], 'Det ökar med 2, 3, 4, 5 och sedan 6.'],
-    [1, 'text', ['64', '32', '16', '8', '4'], ['2', '0', '1', '3'], 'Hälften varje gång.'],
-    [1, 'text', ['1', '2', '4', '7', '11'], ['16', '15', '14', '18'], 'Det ökar med 1, 2, 3, 4 och sedan 5.'],
-    [2, 'figur', ['P@0', 'P@45', 'P@90', 'P@135'], ['P@180', 'P@0', 'P@225', 'P@90'], 'Pilen vrids ett åttondels varv medurs varje gång.'],
-    [2, 'figur', ['Kt', 'Kh', 'Kf', 'Kt', 'Kh'], ['Kf', 'Kt', 'Kh', 'Cf'], 'Kvadraten går tom, halvfylld, fylld och börjar sedan om.'],
-    [2, 'figur', ['Tfx1', 'Tfx2', 'Tfx3', 'Tfx2', 'Tfx1'], ['Tfx2', 'Tfx1', 'Tfx3', 'Tfx4'], 'Antalet går upp till tre och ner till ett, fram och tillbaka.'],
-    [2, 'figur', ['G100000000', 'G010000000', 'G001000000', 'G000100000', 'G000010000'], ['G000001000', 'G000000100', 'G000010000', 'G100000000'], 'Den fyllda rutan går som när man läser: vänster till höger, rad för rad.'],
-    [2, 'figur', ['P@0', 'P@90', 'P@180', 'P@270'], ['P@0', 'P@90', 'P@45', 'P@315'], 'Pilen vrids ett kvarts varv medurs varje gång och är tillbaka där den började.'],
-    [3, 'text', ['T', 'F', 'S', 'Å', 'T', 'T'], ['F', 'T', 'S', 'E'], 'De jämna talen: två, fyra, sex, åtta, tio, tolv och sedan fjorton.'],
-    [3, 'text', ['N', 'U', 'S', 'J', 'M'], ['J', 'V', 'M', 'S'], 'Planeterna utifrån och in: Neptunus, Uranus, Saturnus, Jupiter, Mars och sedan Jorden.'],
-    [3, 'text', ['A', 'B', 'D', 'G', 'K'], ['P', 'O', 'Q', 'N'], 'Stegen i alfabetet blir längre: 1, 2, 3, 4 och sedan 5 bokstäver fram. K plus 5 är P.'],
-    [3, 'text', ['R', 'O', 'G', 'G', 'B', 'I'], ['V', 'L', 'R', 'S'], 'Regnbågens färger: röd, orange, gul, grön, blå, indigo och sedan violett.'],
-    [4, 'text', ['1', '2', '3', '6', '11', '20'], ['37', '31', '40', '34'], 'Varje tal är summan av de tre före: 6 + 11 + 20 = 37.'],
-    [4, 'text', ['1', '4', '9', '61', '52', '63'], ['94', '64', '49', '72'], 'Kvadrattalen skrivna baklänges: 16 blir 61, 25 blir 52, 36 blir 63 och 49 blir 94.'],
-    [4, 'text', ['8', '6', '9', '7', '10', '8'], ['11', '6', '9', '12'], 'Minus 2 och plus 3, om vartannat: 8 + 3 = 11.'],
-    [4, 'text', ['2', '5', '11', '23', '47'], ['95', '94', '71', '96'], 'Gånger 2 plus 1: 47 · 2 + 1 = 95.'],
-    [5, 'matris', ['G111100000', 'G110110000', 'G110100000', 'G011011001', 'G001111001', 'G001011001', 'G100110110', 'G110010011'], ['G100010010', 'G110110111', 'G010100101', 'G100110110'], 'Tredje rutan visar bara de rutor som är fyllda i båda de två första.'],
-    [5, 'matris', ['P@0x1', 'P@90x2', 'P@180x3', 'P@90x2', 'P@180x3', 'P@270x1', 'P@180x3', 'P@270x1'], ['P@0x2', 'P@0x3', 'P@90x2', 'P@270x2'], 'Pilarna vrids ett kvarts varv medurs för varje steg åt höger, och antalet går 1, 2, 3 runt. Efter 270 grader kommer 0 (uppåt), och efter 1 kommer 2.'],
-    [5, 'matris', ['Cf Tf', 'Tf Kf', 'Cf Kf', 'Kt Ct', 'Ct Tt', 'Kt Tt', 'Th Kh', 'Kh Ch'], ['Th Ch', 'Tt Ct', 'Th Kh', 'Kh Ch'], 'Formen som finns i båda de två första rutorna försvinner, och de andra två blir kvar i tredje rutan.']
+    [1, 'text', ['2', '6', '12', '20', '30'], ['42', '40', '44', '36'], 'The difference grows by 2 each time: +4, +6, +8, +10 and then +12.'],
+    [1, 'text', ['5', '10', '20', '40', '80'], ['160', '120', '100', '140'], 'Double each time: 80 · 2 = 160.'],
+    [1, 'text', ['1', '3', '6', '10', '15'], ['21', '20', '18', '25'], 'It goes up by 2, 3, 4, 5 and then 6.'],
+    [1, 'text', ['64', '32', '16', '8', '4'], ['2', '0', '1', '3'], 'Half each time.'],
+    [1, 'text', ['1', '2', '4', '7', '11'], ['16', '15', '14', '18'], 'It goes up by 1, 2, 3, 4 and then 5.'],
+    [2, 'figur', ['P@0', 'P@45', 'P@90', 'P@135'], ['P@180', 'P@0', 'P@225', 'P@90'], 'The arrow turns one eighth of a turn clockwise each time.'],
+    [2, 'figur', ['Kt', 'Kh', 'Kf', 'Kt', 'Kh'], ['Kf', 'Kt', 'Kh', 'Cf'], 'The square goes empty, half-filled, filled and then starts over.'],
+    [2, 'figur', ['Tfx1', 'Tfx2', 'Tfx3', 'Tfx2', 'Tfx1'], ['Tfx2', 'Tfx1', 'Tfx3', 'Tfx4'], 'The number goes up to three and down to one, back and forth.'],
+    [2, 'figur', ['G100000000', 'G010000000', 'G001000000', 'G000100000', 'G000010000'], ['G000001000', 'G000000100', 'G000010000', 'G100000000'], 'The filled square moves the way you read: left to right, row by row.'],
+    [2, 'figur', ['P@0', 'P@90', 'P@180', 'P@270'], ['P@0', 'P@90', 'P@45', 'P@315'], 'The arrow turns a quarter turn clockwise each time and is back where it started.'],
+    [3, 'text', ['T', 'F', 'S', 'E', 'T', 'T'], ['F', 'T', 'S', 'E'], 'The even numbers: two, four, six, eight, ten, twelve and then fourteen.'],
+    [3, 'text', ['N', 'U', 'S', 'J', 'M'], ['E', 'V', 'M', 'S'], 'The planets from the outside in: Neptune, Uranus, Saturn, Jupiter, Mars and then Earth.'],
+    [3, 'text', ['A', 'B', 'D', 'G', 'K'], ['P', 'O', 'Q', 'N'], 'The steps in the alphabet get longer: 1, 2, 3, 4 and then 5 letters ahead. K plus 5 is P.'],
+    [3, 'text', ['R', 'O', 'Y', 'G', 'B', 'I'], ['V', 'L', 'R', 'S'], 'The colors of the rainbow: red, orange, yellow, green, blue, indigo and then violet.'],
+    [4, 'text', ['1', '2', '3', '6', '11', '20'], ['37', '31', '40', '34'], 'Each number is the sum of the three before it: 6 + 11 + 20 = 37.'],
+    [4, 'text', ['1', '4', '9', '61', '52', '63'], ['94', '64', '49', '72'], 'The square numbers written backwards: 16 becomes 61, 25 becomes 52, 36 becomes 63 and 49 becomes 94.'],
+    [4, 'text', ['8', '6', '9', '7', '10', '8'], ['11', '6', '9', '12'], 'Minus 2 and plus 3, taking turns: 8 + 3 = 11.'],
+    [4, 'text', ['2', '5', '11', '23', '47'], ['95', '94', '71', '96'], 'Times 2 plus 1: 47 · 2 + 1 = 95.'],
+    [5, 'matris', ['G111100000', 'G110110000', 'G110100000', 'G011011001', 'G001111001', 'G001011001', 'G100110110', 'G110010011'], ['G100010010', 'G110110111', 'G010100101', 'G100110110'], 'The third box shows only the squares that are filled in both of the first two.'],
+    [5, 'matris', ['P@0x1', 'P@90x2', 'P@180x3', 'P@90x2', 'P@180x3', 'P@270x1', 'P@180x3', 'P@270x1'], ['P@0x2', 'P@0x3', 'P@90x2', 'P@270x2'], 'The arrows turn a quarter turn clockwise for each step to the right, and the number goes 1, 2, 3 around. After 270 degrees comes 0 (up), and after 1 comes 2.'],
+    [5, 'matris', ['Cf Tf', 'Tf Kf', 'Cf Kf', 'Kt Ct', 'Ct Tt', 'Kt Tt', 'Th Kh', 'Kh Ch'], ['Th Ch', 'Tt Ct', 'Th Kh', 'Kh Ch'], 'The shape that is in both of the first two boxes disappears, and the other two stay in the third box.']
   ];
 
   // Tävlingsserierna, förvrängda så att ingen ser dem av misstag.
   var FORVRANGT =
-    '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' +
-    'P134rWZBy1XXBNn6jLPJDOJoNiE=';
+    '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';
 
   // Dagar med Mönsterdagen. Varje dag får en serie per nivå ur poolen, vald med dagens frö.
   var TAVLINGSDAGAR = [7];
@@ -386,14 +386,14 @@
   }
 
   // Text som skärmläsare kan läsa upp för en figurkod.
-  var FORMNAMN = { C: 'cirkel', T: 'triangel', K: 'kvadrat', P: 'pil' };
-  var FYLLNAMN = { f: 'fylld', t: 'tom', h: 'halvfylld' };
+  var FORMNAMN = { C: 'circle', T: 'triangle', K: 'square', P: 'arrow' };
+  var FYLLNAMN = { f: 'filled', t: 'empty', h: 'half-filled' };
   function beskriv(kod) {
-    if (kod[0] === 'G') return 'rutnät, fyllda rutor ' + kod.slice(1).split('').map(function (b, i) { return b === '1' ? i + 1 : null; }).filter(Boolean).join(', ');
+    if (kod[0] === 'G') return 'grid, filled squares ' + kod.slice(1).split('').map(function (b, i) { return b === '1' ? i + 1 : null; }).filter(Boolean).join(', ');
     return kod.split(' ').map(function (del) {
       var m = /^([CTKP])([fth])?(?:@(\d+))?(?:x(\d+))?$/.exec(del) || [];
-      return (m[4] ? m[4] + ' ' : '') + (m[1] !== 'P' && m[2] ? FYLLNAMN[m[2]] + ' ' : '') + FORMNAMN[m[1]] + (m[3] ? ' vriden ' + m[3] + ' grader' : '');
-    }).join(' och ');
+      return (m[4] ? m[4] + ' ' : '') + (m[1] !== 'P' && m[2] ? FYLLNAMN[m[2]] + ' ' : '') + FORMNAMN[m[1]] + (m[4] > 1 ? 's' : '') + (m[3] ? ' turned ' + m[3] + ' degrees' : '');
+    }).join(' and ');
   }
 
   function innehall(typ, varde) {
@@ -459,7 +459,7 @@
     var besvarad = s.svar.length > i, valt = s.svar[i];
     var kort = $('serieKort');
     kort.style.animation = 'none'; void kort.offsetWidth; kort.style.animation = '';
-    $('serieNr').textContent = 'Serie ' + (i + 1) + ' av ' + s.idn.length + (typ === 'matris' ? ': vad saknas nere till höger?' : ': vad kommer härnäst?');
+    $('serieNr').textContent = 'Series ' + (i + 1) + ' of ' + s.idn.length + (typ === 'matris' ? ': what’s missing in the bottom right?' : ': what comes next?');
 
     var rad = $('serie');
     rad.textContent = '';
@@ -499,9 +499,9 @@
 
     $('forklaring').hidden = !besvarad;
     if (besvarad) {
-      $('omdome').textContent = valt === 0 ? 'Rätt!' : 'Inte riktigt';
+      $('omdome').textContent = valt === 0 ? 'Correct!' : 'Not quite';
       $('varfor').textContent = f[4];
-      $('nasta').textContent = i + 1 < s.idn.length ? 'Nästa serie' : 'Visa resultatet';
+      $('nasta').textContent = i + 1 < s.idn.length ? 'Next series' : 'Show the result';
     }
   }
 
@@ -526,7 +526,7 @@
   // ===== Slut och resultat =====
   function tidText(t) {
     var tiondelar = Math.round(totalMs(t) / 100);
-    return Advent.formateraTid(Math.floor(tiondelar / 10)) + ',' + (tiondelar % 10);
+    return Advent.formateraTid(Math.floor(tiondelar / 10)) + '.' + (tiondelar % 10);
   }
 
   function visaSlut() {
@@ -534,7 +534,7 @@
     $('slut').hidden = false;
     $('antalRatt').textContent = ratt;
     $('rutor').textContent = rutorText(s);
-    $('sluttid').textContent = 'Tid: ' + tidText(s);
+    $('sluttid').textContent = 'Time: ' + tidText(s);
     $('sluttext').textContent = m ? { guld: '🥇 Gold!', silver: '🥈 Silver!', brons: '🥉 Bronze!' }[m] : '';
     $('sluttext').hidden = !m;
     if (!ovning) forsokSkicka();
@@ -584,7 +584,7 @@
   }
   $('gavupp').addEventListener('click', function () {
     if (!kanSkicka()) return;
-    Advent.fraga({ rubrik: 'Vill du ge upp?', text: 'Då kan du inte skicka något resultat för den här luckan.', ja: 'Ge upp', nej: 'Avbryt' })
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
       .then(function (ok) {
         if (!ok) return;
         R.skicka({ dag: dag, spel: 'monster', status: 'gav upp', medalj: '', text: '' })
@@ -597,7 +597,7 @@
   // ===== Visa en omgång =====
   function visa(idn, arOvning) {
     ovning = arOvning;
-    $('under').textContent = ovning ? 'Övningsserier' : 'Day ' + dag;
+    $('under').textContent = ovning ? 'Practice series' : 'Day ' + dag;
     $('ovningsmarke').hidden = !ovning;
     $('tillDagens').hidden = !ovning;
     $('skickat').textContent = '';
