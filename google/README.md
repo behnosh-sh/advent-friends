@@ -1,11 +1,10 @@
 # Vännernas resultattavla i Google
 
 Samma upplägg som familjens: ett privat Google Sheet och ett litet Apps Script som körs som Behnosh.
-Arket delas aldrig, och koderna finns bara i arket. Två script:
+Arket delas aldrig, och koderna finns bara i arket.
 
-- `resultat.gs` – webbappen som sidan pratar med. Ligger i vännernas ark.
-- `kopiera-behnosh.gs` – kopierar Behnoshs rader från familjens ark till fliken **Familjen** i vännernas ark
-  var 10:e minut. Ett eget, fristående projekt. Familjens ark läses bara.
+`resultat.gs` är webbappen som sidan pratar med. Den har `@OnlyCurrentDoc` och kommer bara åt vännernas ark.
+Inget script eller formel kommer åt familjens ark. Dina resultat klistrar du in själv i fliken **Familjen**.
 
 ## 1. Arket och webbappen (en gång)
 
@@ -20,16 +19,13 @@ Arket delas aldrig, och koderna finns bara i arket. Två script:
    Tryck **Distribuera** och kopiera adressen (slutar på `/exec`).
 6. Skicka adressen till Claude, eller klistra in den i `js/resultat.js` på raden `var ADRESS = '';`.
 
-## 2. Kopieringen av dina resultat (en gång)
+## Dina resultat från familjen (när du vill, t.ex. en gång om dagen)
 
-1. Gå till https://script.google.com och tryck **Nytt projekt**. Döp det till t.ex. "Kopiera Behnosh".
-2. Ta bort det som står där och klistra in hela `kopiera-behnosh.gs`.
-3. Klistra in adressen till familjens ark mellan fnuttarna på raden `var FAMILJENS_ARK = '';`
-   och adressen till vännernas ark på raden `var VANNERNAS_ARK = '';`. Spara.
-4. Välj funktionen **installera** och tryck **Kör**. Godkänn behörigheterna. Google frågar efter
-   tillgång till dina kalkylark, eftersom scriptet ska läsa ett ark och skriva i ett annat.
-5. Klart. Loggen säger hur många rader som kopierades, och fliken **Familjen** i vännernas ark fylls.
-   Den uppdateras sedan var 10:e minut. Familjens ark ändras aldrig.
+1. I familjens ark, fliken **Resultat**: markera dina rader (filtrera gärna på kolumnen Spelare = Behnosh) och kopiera dem.
+2. I vännernas ark, fliken **Familjen**: klistra in från rad 2 (rubriken står kvar). Det är enklast att varje gång
+   ersätta allt under rubriken med alla dina rader, så kan inget bli dubbelt.
+3. Klart. Texten får vara på svenska och alla dagar får följa med: scriptet gör om texten till engelska,
+   hoppar över dag 7, 16 och 21 och visar "–" för dig de dagarna. Andra personers rader i fliken ignoreras.
 
 ## Säkerhet
 

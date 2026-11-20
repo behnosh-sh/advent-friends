@@ -8,8 +8,9 @@
 // Flikar som scriptet använder (skapas av installera() om de saknas):
 //   Spelare:  Namn | Kod
 //   Resultat: Tidsstämpel | Dag | Spel | Spelare | Status | Värde | Medalj | Text
-//   Familjen: Behnoshs rader från familjens ark, samma kolumner. Fylls av det separata scriptet
-//             kopiera-behnosh.gs (läser familjens ark, ändrar det aldrig). Det här scriptet bara läser fliken.
+//   Familjen: Behnoshs rader från familjens ark, samma kolumner. Behnosh klistrar in dem själv när hon vill
+//             (kopiera hennes rader ur familjens flik Resultat, som de är, på svenska). Inget script eller
+//             någon formel kommer åt familjens ark; det här scriptet läser bara fliken.
 //
 // Behnosh spelar bara familjens kalender. Hennes jämförbara dagar läses från fliken Familjen (texten görs om
 // till engelska), och dagar som inte går att jämföra (STRECK_DAGAR) får en rad "–" åt henne. Hon kan aldrig
