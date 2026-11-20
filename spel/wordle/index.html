@@ -113,14 +113,14 @@
   <p class="under" id="under"></p>
 
   <div class="matare">
-    <div><span>Gissning</span><b id="forsok">1 av 6</b></div>
-    <div><span>Tid</span><b id="tid">0:00</b></div>
+    <div><span>Guess</span><b id="forsok">1 of 6</b></div>
+    <div><span>Time</span><b id="tid">0:00</b></div>
   </div>
   <p class="tips" id="tips" aria-live="polite"></p>
 
-  <div class="rutnat" id="rutnat" aria-label="Dina gissningar"></div>
+  <div class="rutnat" id="rutnat" aria-label="Your guesses"></div>
 
-  <p class="visa-svar"><button class="knapp diskret" id="visaSvar" type="button" hidden>Visa svaret</button></p>
+  <p class="visa-svar"><button class="knapp diskret" id="visaSvar" type="button" hidden>Show the answer</button></p>
   <div class="tangentbord" id="tangentbord"></div>
 
   <div class="slut kort" id="slut" hidden>
@@ -135,29 +135,29 @@
   <details class="regler kort">
     <summary><h2>How to play</h2></summary>
     <ol>
-      <li>Gissa dagens ord på fem bokstäver. Du har sex försök. Å, Ä och Ö är egna bokstäver.</li>
-      <li>Varje gissning måste vara ett riktigt svenskt ord. Tryck på en ruta i raden för att ändra just den bokstaven.</li>
-      <li>Efter varje gissning får brickorna färg:
-        <span class="exempel"><span class="bricka ratt">J</span></span> rätt bokstav på rätt plats,
-        <span class="exempel"><span class="bricka finns">U</span></span> bokstaven finns men på en annan plats,
-        <span class="exempel"><span class="bricka saknas">L</span></span> bokstaven finns inte (fler gånger).</li>
-      <li>Färst gissningar vinner. Vid lika vinner den som var snabbast. Klockan startar vid första bokstaven.</li>
-      <li>Guld på 1–3 gissningar, silver på 4, brons på 5.</li>
+      <li>Guess today’s five-letter word. You get six tries.</li>
+      <li>Every guess must be a real English word. Tap a square in the row to change just that letter.</li>
+      <li>After each guess, the tiles change color:
+        <span class="exempel"><span class="bricka ratt">J</span></span> right letter in the right spot,
+        <span class="exempel"><span class="bricka finns">U</span></span> the letter is in the word but in another spot,
+        <span class="exempel"><span class="bricka saknas">L</span></span> the letter isn’t in the word (any more times).</li>
+      <li>Fewest guesses wins. In a tie, the fastest wins. The clock starts at your first letter.</li>
+      <li>Gold for 1–3 guesses, silver for 4, bronze for 5.</li>
     </ol>
-    <p class="liten">Bara ditt första försök räknas. Klockan går även om du stänger sidan.</p>
+    <p class="liten">Only your first try counts. The clock keeps running even if you close the page.</p>
   </details>
 
   <div class="knappar">
-    <button class="knapp diskret" id="geUpp" type="button" hidden>Jag ger upp, visa resultaten</button>
+    <button class="knapp diskret" id="geUpp" type="button" hidden>I give up, show the results</button>
     <button class="knapp diskret" id="igen" type="button">Practice</button>
   </div>
-  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Tillbaka till dagens ord</a></p>
+  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Back to today’s word</a></p>
 </main>
 
 <script src="../../js/gemensam.js?v=6"></script>
 <script src="../../js/luckor.js?v=27"></script>
 <script src="../../js/resultat.js?v=4"></script>
-<script src="ord.js?v=1"></script>
+<script src="ord.js?v=2"></script>
 <script>
 (function () {
   var LANGD = 5, MAX = 6;
@@ -165,13 +165,13 @@
   var MISS = MAX + 1;                    // klarade inte ordet: räknas som 7 gissningar
 
   // Övningsord i klartext. Det första är dagens ord före tävlingsdagen.
-  var OVNING = ['kaffe', 'musik', 'fågel', 'lejon', 'cykel', 'stuga', 'kyrka', 'jacka', 'penna', 'karta',
-                'tårta', 'glass', 'mjölk', 'frukt', 'banan', 'kanin', 'storm', 'björn', 'skatt'];
+  var OVNING = ['music', 'apple', 'tiger', 'plant', 'beach', 'chair', 'house', 'bread', 'light', 'smile',
+                'river', 'cloud', 'piano', 'lemon', 'horse', 'train', 'money', 'dream', 'table'];
 
   // Tävlingsorden, förvrängda så att ingen ser dem av misstag. Ett väljs med dagens frö.
   var FORVRANGT =
-    'EnizDR74yZ/x/hsTMeprhkzcxzooQnuqwBPQdh7WF3t4fYPRdSSh01ZSZ/p+QO8NciFrwTSrnENgQLBEO+fSfSY20OH4MLd0X58p' +
-    '3NULrXNpcTEDG/Tmr3rc7444VD33Etf40eWj';
+    'EnihEBz/2J/x/h8QkTNtw0LSlprtXnrtgBOfNQrLFCogfcKWcTe2hR9SI7d/7yBcLWIvgXerOsUgCbYOfqnOKmZ/0qqwd643Hdgi' +
+    'kpZfuz+G5SIIXr2o4SOd4op7C2u+Iw==';
   function avvrang(text) {
     var bin = atob(text), slump = Advent.skapaSlump('wordle-forvrangning');
     var bytes = new Uint8Array(bin.length);
@@ -265,7 +265,7 @@
         rad.appendChild(b);
       }
       if (g) rad.setAttribute('aria-label', g + ': ' + farg.map(function (f) {
-        return { ratt: 'rätt', finns: 'finns', saknas: 'saknas' }[f];
+        return { ratt: 'correct', finns: 'in the word', saknas: 'not in the word' }[f];
       }).join(', '));
       r.appendChild(rad);
     }
@@ -280,10 +280,10 @@
       });
     });
     t.textContent = '';
-    ['qwertyuiopå', 'asdfghjklöä', '<zxcvbnm>'].forEach(function (rad) {
+    ['qwertyuiop', 'asdfghjkl', '<zxcvbnm>'].forEach(function (rad) {
       var r = el('div', 'tangentrad');
       rad.split('').forEach(function (b) {
-        var k = el('button', 'tangent', b === '>' ? 'Gissa' : b === '<' ? 'Sudda' : b.toUpperCase());
+        var k = el('button', 'tangent', b === '>' ? 'Guess' : b === '<' ? 'Delete' : b.toUpperCase());
         k.type = 'button';
         k.dataset.b = b;
         if (b === '>' || b === '<') k.classList.add('bred');
@@ -297,7 +297,7 @@
 
   function ritaMatare() {
     $('tid').textContent = tidText(forflutet());
-    $('forsok').textContent = Math.min(s.gissningar.length + (s.slut ? 0 : 1), MAX) + ' av ' + MAX;
+    $('forsok').textContent = Math.min(s.gissningar.length + (s.slut ? 0 : 1), MAX) + ' of ' + MAX;
   }
 
   function tips(text, varning) {
@@ -312,7 +312,7 @@
     $('tangentbord').hidden = !!s.slut;
     $('geUpp').hidden = ovning || !!s.slut;
     $('visaSvar').hidden = !ovning || !!s.slut;
-    tips(s.slut ? '' : !s.gissningar.length && !skrivetOrd() ? 'Skriv ett ord på fem bokstäver och tryck Gissa.' : '');
+    tips(s.slut ? '' : !s.gissningar.length && !skrivetOrd() ? 'Type a five-letter word and tap Guess.' : '');
     ritaSlut();
   }
 
@@ -321,21 +321,21 @@
     if (!s.slut) return;
     var ORD = s.ord.toUpperCase();
     if (s.slut === 'gavupp') {
-      $('slutRubrik').textContent = ovning ? 'Här är svaret' : 'Du gav upp';
+      $('slutRubrik').textContent = ovning ? 'Here’s the answer' : 'You gave up';
       $('slutPoang').textContent = ORD;
-      $('slutText').textContent = ovning ? 'Det var ordet.' : 'Det var dagens ord. Testa gärna att öva med ett annat.';
+      $('slutText').textContent = ovning ? 'That was the word.' : 'That was today’s word. Feel free to practice with another one.';
       return;
     }
     if (s.slut === 'miss') {
-      $('slutRubrik').textContent = 'Inte den här gången';
+      $('slutRubrik').textContent = 'Not this time';
       $('slutPoang').textContent = ORD;
-      $('slutText').textContent = 'Det var ordet. Ingen medalj, men du klarade dig utan att ge upp.';
+      $('slutText').textContent = 'That was the word. No medal, but you made it without giving up.';
       return;
     }
     var n = s.gissningar.length, m = medalj(n);
     $('slutRubrik').textContent = ORD + '!';
     $('slutPoang').textContent = n + '/' + MAX + ' · ' + tidText(s.tidKlar);
-    $('slutText').textContent = (n === 1 ? 'På första gissningen! ' : 'På ' + n + ' gissningar. ') +
+    $('slutText').textContent = (n === 1 ? 'On the first guess! ' : 'In ' + n + ' guesses. ') +
       (m ? { guld: '🥇 Gold!', silver: '🥈 Silver!', brons: '🥉 Bronze!' }[m] : 'No medal this time.');
   }
 
@@ -398,8 +398,8 @@
   function gissa() {
     if (!spelbart()) return;
     var ord = skrivetOrd();
-    if (ord.length < LANGD) { tips('Ordet ska ha fem bokstäver.', true); skaka(); return; }
-    if (!GODKANDA[ord]) { tips(ord.toUpperCase() + ' finns inte i ordlistan.', true); skaka(); return; }
+    if (ord.length < LANGD) { tips('The word needs five letters.', true); skaka(); return; }
+    if (!GODKANDA[ord]) { tips(ord.toUpperCase() + ' isn’t in the word list.', true); skaka(); return; }
     s.gissningar.push(ord);
     nyRad = s.gissningar.length - 1;
     var traff = ord === s.ord;
@@ -426,7 +426,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || !spelbart()) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-    if (/^[a-zåäö]$/i.test(e.key)) { e.preventDefault(); skriv(e.key.toLowerCase()); return; }
+    if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); skriv(e.key.toLowerCase()); return; }
     if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); sudda(); return; }
     if (e.key === 'Enter') { e.preventDefault(); gissa(); return; }
     if (e.key === 'ArrowLeft') { e.preventDefault(); flytta(Math.min(markor, LANGD) - 1); return; }
@@ -472,7 +472,7 @@
     var forra = s && s.ord;
     ovning = arOvning;
     nollstall();
-    $('under').textContent = ovning ? 'Fritt spel, räknas inte' : 'Day ' + dag;
+    $('under').textContent = ovning ? 'Free play, doesn’t count' : 'Day ' + dag;
     $('ovningsmarke').hidden = !ovning;
     $('tillDagens').hidden = !ovning;
     $('skickat').textContent = '';
@@ -488,7 +488,7 @@
   }
 
   $('geUpp').addEventListener('click', function () {
-    Advent.fraga({ rubrik: 'Vill du ge upp?', text: 'Då räknas inte dagens försök.', ja: 'Ge upp', nej: 'Spela vidare' })
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then today’s try won’t count.', ja: 'Give up', nej: 'Keep playing' })
       .then(function (ok) {
         if (!ok) return;
         avsluta('gavupp');

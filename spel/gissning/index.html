@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gissningsdagen</title>
+<title>Guessing Day</title>
 <meta name="theme-color" content="#14233F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,12 +93,12 @@
 <body>
 <main class="spalt">
   <a class="tillbaka" href="../../">← Calendar</a>
-  <h1>Gissningsdagen <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
+  <h1>Guessing Day <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
   <p class="under" id="under"></p>
 
   <div class="start kort" id="start" hidden>
-    <p>Fem udda frågor där svaret är ett tal. Ingen vet, alla gissar. Den som totalt hamnar närmast vinner.</p>
-    <button class="knapp" id="startknapp" type="button">Starta</button>
+    <p>Five odd questions where the answer is a number. Nobody knows, everybody guesses. Whoever ends up closest overall wins.</p>
+    <button class="knapp" id="startknapp" type="button">Start</button>
   </div>
 
   <section id="spel" hidden>
@@ -108,8 +108,8 @@
       <p class="nr" id="fragaNr"></p>
       <h2 id="fragaText"></h2>
       <div class="gissa">
-        <input id="gissning" type="text" inputmode="decimal" enterkeyhint="done" aria-label="Din gissning" placeholder="Din gissning">
-        <button class="knapp" id="gissaKnapp" type="submit" disabled>Gissa</button>
+        <input id="gissning" type="text" inputmode="decimal" enterkeyhint="done" aria-label="Your guess" placeholder="Your guess">
+        <button class="knapp" id="gissaKnapp" type="submit" disabled>Guess</button>
       </div>
       <p class="enhet" id="tolkat" aria-live="polite"></p>
     </form>
@@ -118,20 +118,20 @@
       <p class="nr" id="svarNr"></p>
       <h2 id="svarFraga"></h2>
       <div class="svar">
-        <div class="rad"><span>Din gissning</span><b id="dinGissning"></b></div>
-        <div class="rad"><span>Rätt svar</span><b id="rattSvar"></b></div>
+        <div class="rad"><span>Your guess</span><b id="dinGissning"></b></div>
+        <div class="rad"><span>Correct answer</span><b id="rattSvar"></b></div>
         <p class="omdome" id="omdome"></p>
         <div class="skala"><span class="mitt"></span><span class="markor" id="markor"></span></div>
-        <div class="skala-text"><span>För lågt</span><span>För högt</span></div>
-        <p class="fakta" id="fakta"><b>Visste du?</b><span id="faktaText"></span></p>
+        <div class="skala-text"><span>Too low</span><span>Too high</span></div>
+        <p class="fakta" id="fakta"><b>Did you know?</b><span id="faktaText"></span></p>
         <button class="knapp" id="nasta" type="button"></button>
       </div>
     </div>
   </section>
 
   <div class="slut kort" id="slut" hidden>
-    <h2>Resultat</h2>
-    <p class="poang"><span id="summa"></span> <small>av 500</small></p>
+    <h2>Result</h2>
+    <p class="poang"><span id="summa"></span> <small>of 500</small></p>
     <p class="rutor" id="rutor"></p>
     <p id="sluttext"></p>
     <ol class="genomgang" id="genomgang"></ol>
@@ -139,7 +139,7 @@
   </div>
 
   <div class="knappar" id="gavuppRuta" hidden>
-    <button class="knapp diskret" id="gavupp" type="button">Jag ger upp, visa resultaten</button>
+    <button class="knapp diskret" id="gavupp" type="button">I give up, show the results</button>
   </div>
 
   <section id="tavla"></section>
@@ -147,18 +147,18 @@
   <details class="regler kort">
     <summary><h2>How to play</h2></summary>
     <ol>
-      <li>Gissa ett tal på varje fråga. Ingen tidsgräns, men inget googlande!</li>
-      <li>Efter varje gissning får du se rätt svar och hur nära du kom, från grönt till rött.</li>
-      <li>Det räknas hur många <i>gånger</i> fel du är, så stora och små svar väger lika. Hälften eller dubbelt så mycket är lika fel.</li>
-      <li>Varje fråga ger 0–100 poäng och poängen visas på slutet. Högst totalt vinner. Guld från 400, silver från 330, brons från 250.</li>
+      <li>Guess a number for each question. No time limit, but no googling!</li>
+      <li>After each guess you see the correct answer and how close you got, from green to red.</li>
+      <li>What counts is how many <i>times</i> off you are, so big and small answers weigh the same. Half or double is equally wrong.</li>
+      <li>Each question gives 0–100 points, shown at the end. Highest total wins. Gold from 400, silver from 330, bronze from 250.</li>
     </ol>
-    <p class="liten">Bara ditt första försök på dagens frågor räknas.</p>
+    <p class="liten">Only your first try at today’s questions counts.</p>
   </details>
 
   <div class="knappar">
     <button class="knapp diskret" id="igen" type="button">Practice</button>
   </div>
-  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Tillbaka till dagens frågor</a></p>
+  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Back to today’s questions</a></p>
 </main>
 
 <script src="../../js/gemensam.js?v=6"></script>
@@ -170,126 +170,127 @@
 
   // Testset som får visas. Används som övning och som dagens frågor innan tävlingen börjar.
   var TESTSET = [
-    ['Hur många muskler har en katt i varje öra?', 32, 'muskler', 'Därför kan katten vrida öronen nästan 180 grader, var för sig.'],
-    ['Hur många minuter varade världens kortaste krig, mellan Storbritannien och Zanzibar?', 38, 'minuter', 'Efteråt krävde britterna att Zanzibar skulle betala för ammunitionen.'],
-    ['Hur många meter är världens kortaste reguljära flygsträcka, Westray–Papa Westray på Orkney?', 2700, 'meter', 'Flygturen tar runt en och en halv minut. Rekordet är 53 sekunder.'],
-    ['Hur många tänder har en vanlig trädgårdssnäcka?', 14000, 'tänder', 'Tänderna sitter på en raspliknande tunga som fungerar som ett rivjärn.'],
-    ['Hur många gånger per minut kan en blåvals hjärta slå när den dyker djupt?', 2, 'slag', 'Forskare satte en mätare på en blåval med sugkoppar och kunde mäta det.'],
-    ['Hur många år var den äldsta grönlandshaj som undersökts?', 392, 'år', 'Ålder räknades fram från ögats lins. Grönlandshajen blir könsmogen först runt 150 års ålder.'],
-    ['Hur många sekunder varade bröderna Wrights första flygning?', 12, 'sekunder', 'Planet flög 37 meter, kortare än vingbredden på ett modernt jumbojetplan.'],
-    ['Hur många blommor måste bin besöka för att göra ett halvt kilo honung?', 2000000, 'blommor', 'Ett enda bi gör bara ungefär en tolftedels tesked honung under hela sitt liv.'],
-    ['Hur många kilometer i timmen kan en pilgrimsfalk nå i en störtdykning?', 390, 'km/h', 'Det gör den till världens snabbaste djur.'],
-    ['Hur många dygn tar det för Venus att snurra ett varv runt sin egen axel?', 243, 'dygn', 'Det är längre än ett år på Venus, som bara är 225 dygn.']
+    ['How many muscles does a cat have in each ear?', 32, 'muscles', 'That\'s why a cat can turn each ear almost 180 degrees, one at a time.'],
+    ['How many minutes did the shortest war in history, between Britain and Zanzibar, last?', 38, 'minutes', 'Afterwards, the British demanded that Zanzibar pay for the ammunition.'],
+    ['How many meters is the world\'s shortest scheduled flight, Westray to Papa Westray in Orkney?', 2700, 'meters', 'The flight takes about a minute and a half. The record is 53 seconds.'],
+    ['How many teeth does a common garden snail have?', 14000, 'teeth', 'The teeth sit on a rasp-like tongue that works like a cheese grater.'],
+    ['How many times per minute can a blue whale\'s heart beat during a deep dive?', 2, 'beats', 'Researchers attached a sensor to a blue whale with suction cups and measured it.'],
+    ['How many years old was the oldest Greenland shark ever examined?', 392, 'years', 'Its age was worked out from the lens of its eye. Greenland sharks only reach maturity at around 150.'],
+    ['How many seconds did the Wright brothers\' first flight last?', 12, 'seconds', 'The plane flew 37 meters, shorter than the wingspan of a modern jumbo jet.'],
+    ['How many flowers do bees have to visit to make a pound of honey?', 2000000, 'flowers', 'A single bee makes only about a twelfth of a teaspoon of honey in its whole life.'],
+    ['How many kilometers per hour can a peregrine falcon reach in a dive?', 390, 'km/h', 'That makes it the fastest animal in the world.'],
+    ['How many days does it take Venus to spin once on its own axis?', 243, 'days', 'That\'s longer than a year on Venus, which is only 225 days.']
   ];
 
   // Tävlingsfrågorna, förvrängda så att ingen ser dem av misstag.
   var FORVRANGT =
-    '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' +
-    'n0m/LEpmnVQ9NxIgcw==';
+    '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' +
+    'FoL5uYiTiYDun/ggPIMN+c+Kmcc=';
 
   // Dagar med Gissningsdagen. Varje dag får fem egna frågor ur poolen, valda med dagens frö.
   var TAVLINGSDAGAR = [4];
@@ -360,7 +361,7 @@
     return Math.max(0, Math.round(100 - 50 * Math.log10(ggrFel(gissning, svar))));
   }
   var ZONGRANS = [1.25, 2, 5, 20];
-  var ZONORD = ['Pricken!', 'Nära', 'En bit bort', 'Långt bort', 'Helt ute och cyklar'];
+  var ZONORD = ['Spot on!', 'Close', 'A bit off', 'Way off', 'Not even close'];
   var ZONRUTA = ['🟩', '🟨', '🟧', '🟥', '🟥'];
   function zon(gissning, svar) {
     var r = ggrFel(gissning, svar), z = 0;
@@ -386,11 +387,13 @@
 
   // ===== Tal =====
   function tolka(text) {
-    var t = String(text).replace(/[\s  ]/g, '').replace(',', '.');
+    var t = String(text).replace(/[\s  ]/g, '');
+    // 1,500 och 2,000,000 är tusental (engelska). Annars är ett kommatecken decimaltecken (2,5).
+    t = /^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t) ? t.replace(/,/g, '') : t.replace(',', '.');
     if (!/^\d+(\.\d+)?$|^\.\d+$/.test(t)) return null;
     return Number(t);
   }
-  function visaTal(n) { return n.toLocaleString('sv-SE', { maximumFractionDigits: 2 }); }
+  function visaTal(n) { return n.toLocaleString('en-US', { maximumFractionDigits: 2 }); }
 
   // ===== Spelets tillstånd =====
   // Dagens frågor sparas i telefonen, så att man inte kan börja om genom att ladda om sidan.
@@ -434,7 +437,7 @@
     }
     $('spel').hidden = false;
     ritaPrickar();
-    var i = s.steg, f = fraga(s.idn[i]), nr = 'Fråga ' + (i + 1) + ' av ' + s.idn.length;
+    var i = s.steg, f = fraga(s.idn[i]), nr = 'Question ' + (i + 1) + ' of ' + s.idn.length;
     var besvarad = s.gissningar.length > i;
     $('fragaKort').hidden = besvarad;
     $('svarKort').hidden = !besvarad;
@@ -453,7 +456,7 @@
     $('rattSvar').textContent = visaTal(f[1]) + ' ' + f[2];
     $('omdome').textContent = ZONRUTA[z] + ' ' + ZONORD[z];
     $('faktaText').textContent = f[3];
-    $('nasta').textContent = i + 1 < s.idn.length ? 'Nästa fråga' : 'Visa resultatet';
+    $('nasta').textContent = i + 1 < s.idn.length ? 'Next question' : 'Show the result';
     var markor = $('markor');
     markor.style.transition = 'none';
     markor.style.left = '50%';
@@ -466,7 +469,7 @@
     var text = $('gissning').value, n = tolka(text), f = fraga(s.idn[s.steg]);
     $('gissaKnapp').disabled = n === null;
     $('tolkat').textContent = n === null
-      ? (text.trim() ? 'Skriv bara ett tal, t.ex. 1 500 eller 2,5' : 'Svara i ' + f[2])
+      ? (text.trim() ? 'Just type a number, e.g. 1500 or 2.5' : 'Answer in ' + f[2])
       : '= ' + visaTal(n) + ' ' + f[2];
   }
   $('gissning').addEventListener('input', uppdateraTolkat);
@@ -502,8 +505,8 @@
       var f = fraga(id), g = s.gissningar[i];
       var li = el('li');
       li.appendChild(el('span', 'q', f[0]));
-      li.appendChild(el('span', 'siffror', ZONRUTA[zon(g, f[1])] + ' ' + visaTal(g) + ' (rätt: ' + visaTal(f[1]) + ' ' + f[2] + ')'));
-      li.appendChild(el('span', 'p', poang(g, f[1]) + ' p'));
+      li.appendChild(el('span', 'siffror', ZONRUTA[zon(g, f[1])] + ' ' + visaTal(g) + ' (answer: ' + visaTal(f[1]) + ' ' + f[2] + ')'));
+      li.appendChild(el('span', 'p', poang(g, f[1]) + ' pts'));
       lista.appendChild(li);
     });
     if (!ovning) forsokSkicka();
@@ -513,7 +516,7 @@
   function resultatet(t) {
     var gammalt = s;
     s = t;
-    var sum = summa(), r = { varde: sum, medalj: medalj(sum), text: rutorText() + ' · ' + sum + ' p' };
+    var sum = summa(), r = { varde: sum, medalj: medalj(sum), text: rutorText() + ' · ' + sum + ' pts' };
     s = gammalt;
     return r;
   }
@@ -551,7 +554,7 @@
   }
   $('gavupp').addEventListener('click', function () {
     if (!kanSkicka()) return;
-    Advent.fraga({ rubrik: 'Vill du ge upp?', text: 'Då kan du inte skicka något resultat för den här luckan.', ja: 'Ge upp', nej: 'Avbryt' })
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
       .then(function (ok) {
         if (!ok) return;
         R.skicka({ dag: dag, spel: 'gissning', status: 'gav upp', medalj: '', text: '' })
@@ -564,7 +567,7 @@
   // ===== Visa en omgång =====
   function visa(idn, arOvning) {
     ovning = arOvning;
-    $('under').textContent = ovning ? 'Övningsfrågor' : 'Day ' + dag;
+    $('under').textContent = ovning ? 'Practice questions' : 'Day ' + dag;
     $('ovningsmarke').hidden = !ovning;
     $('tillDagens').hidden = !ovning;
     $('skickat').textContent = '';

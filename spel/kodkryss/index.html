@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kodkryss</title>
+<title>Codeword</title>
 <meta name="theme-color" content="#14233F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -125,24 +125,24 @@
 <body>
 <main class="spalt">
   <a class="tillbaka" href="../../">← Calendar</a>
-  <h1>Kodkryss <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
+  <h1>Codeword <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
   <p class="under" id="under"></p>
 
   <div class="matare">
-    <div><span>Tid</span><b id="tid">0:00</b></div>
-    <div><span>Ledtrådar</span><b id="ledtradar">0</b></div>
+    <div><span>Time</span><b id="tid">0:00</b></div>
+    <div><span>Hints</span><b id="ledtradar">0</b></div>
   </div>
   <p class="tips" id="tips" aria-live="polite"></p>
 
   <div class="rutnat-ram">
-    <div class="rutnat" id="rutnat" aria-label="Kodkrysset. Tryck på en ruta och välj bokstav på tangentbordet."></div>
+    <div class="rutnat" id="rutnat" aria-label="The codeword. Tap a square and pick a letter on the keyboard."></div>
   </div>
   <div class="tabell" id="tabell"></div>
 
-  <p class="visa-svar"><button class="knapp diskret" id="visaSvar" type="button" hidden>Visa svaret</button></p>
+  <p class="visa-svar"><button class="knapp diskret" id="visaSvar" type="button" hidden>Show the answer</button></p>
   <div class="tangentbord" id="tangentbord"></div>
   <div class="verktyg" id="verktyg">
-    <button class="knapp diskret" id="ledtrad" type="button">Ledtråd (+30 s)</button>
+    <button class="knapp diskret" id="ledtrad" type="button">Hint (+30 s)</button>
   </div>
 
   <div class="slut kort" id="slut" hidden>
@@ -157,21 +157,21 @@
   <details class="regler kort">
     <summary><h2>How to play</h2></summary>
     <ol>
-      <li>Ett korsord utan ledtrådar. Varje ruta har en siffra, och samma siffra är alltid samma bokstav. Alla ord är vanliga svenska ord, vågrätt och lodrätt.</li>
-      <li>Tre bokstäver är ifyllda från början. Tryck på en ruta och välj vilken bokstav du tror att siffran står för. Den fylls i överallt där siffran finns.</li>
-      <li>Alla bokstäver A–Ö behöver inte vara med. Tabellen under rutnätet visar siffrorna som finns.</li>
-      <li>Du får inte veta om en bokstav är fel. När allt stämmer är krysset löst.</li>
-      <li>Fastnar du kan du ta en ledtråd. Den visar en rätt bokstav men kostar 30 sekunder.</li>
-      <li>Klockan startar när du trycker på Starta. Lägst tid vinner. Guld under 5 minuter, silver under 8, brons under 12.</li>
+      <li>A crossword without clues. Every square has a number, and the same number is always the same letter. All words are common English words, across and down.</li>
+      <li>Three letters are filled in from the start. Tap a square and pick the letter you think the number stands for. It gets filled in everywhere that number appears.</li>
+      <li>Not every letter from A to Z has to be used. The table below the grid shows the numbers in play.</li>
+      <li>You won’t be told if a letter is wrong. When everything is right, the puzzle is solved.</li>
+      <li>If you get stuck, you can take a hint. It reveals a correct letter but costs 30 seconds.</li>
+      <li>The clock starts when you tap Start. Lowest time wins. Gold under 5 minutes, silver under 8, bronze under 12.</li>
     </ol>
-    <p class="liten">Bara ditt första försök räknas. Klockan går även om du stänger sidan.</p>
+    <p class="liten">Only your first try counts. The clock keeps running even if you close the page.</p>
   </details>
 
   <div class="knappar">
-    <button class="knapp diskret" id="geUpp" type="button" hidden>Jag ger upp, visa resultaten</button>
+    <button class="knapp diskret" id="geUpp" type="button" hidden>I give up, show the results</button>
     <button class="knapp diskret" id="igen" type="button">Practice</button>
   </div>
-  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Tillbaka till dagens kodkryss</a></p>
+  <p class="liten" id="tillDagens" hidden><a id="tillDagensLank" href="">Back to today’s codeword</a></p>
 </main>
 
 <script src="../../js/gemensam.js?v=6"></script>
@@ -186,43 +186,38 @@
   // Övningskryss i klartext ('.' = svart ruta). givna = bokstäver som är ifyllda från start.
   var OVNING = [
     { rader: [
-      'haj.c.sköts',
-      '.du.h.ko..i',
-      'av.hotellet',
-      '.o..c..o.nu',
-      'skurkarna.a',
-      '.a..e..i..t',
-      'stjärnan.vi',
-      'le..a.p..ro',
-      'århundraden',
-      'sno.d.i.ide',
-      'sannerligen'
-    ], givna: 'okh' },
+      'instead.sea',
+      'n.p.x.e.a.r',
+      'theta.mayor',
+      'e.n.m.o...a',
+      'red.penguin',
+      'e...l.s.n.g',
+      'suggest.are',
+      't.r...r.w.m',
+      'ideas.aware',
+      'n.a.i.t.r.n',
+      'get.present'
+    ], givna: 'pdw' },
     { rader: [
-      'matematik.ö',
-      'å.a..nå.o.v',
-      '.stånd.ämne',
-      'e.u.i.j.mur',
-      'f.e.v.ute.l',
-      'förhållande',
-      'e.i.e.k.t.v',
-      'kontrollera',
-      't.gå..a.rån',
-      'e.e.pappa.d',
-      'nån...på.se'
-    ], givna: 'lmp' }
+      'scoop.jumps',
+      't.p.a.o.a.c',
+      'rip.routine',
+      'i.o.t.r.n.n',
+      'portion.the',
+      '..t.c.a.e..',
+      'you.islands',
+      'e.n.p.i.a.i',
+      'animals.not',
+      'r.t.t.t.c.e',
+      'style.seems'
+    ], givna: 'mcl' }
   ];
 
   // Tävlingskryssen, förvrängda så att ingen ser dem av misstag. Ett väljs med dagens frö.
   var FORVRANGT =
-    'zFhVcphDNsqhnogUlmPeNGYyo+HgIqFpmsNnAv248AcorlkSLXK4NyMSyo/5arnbjAO2hySNCq2Y/FaPVLJHXCbfhbitcIrHiyZ2' +
-    'INJQ+5aKveQd8/SsCfXtjxsV7gyBMgJz9w4SoTtYO/VpVY9dkwU/UOjuCvlHcdwi6J84+xkUGiPFEyCg2b9MOKgSIahxgcZMIeBW' +
-    'r/1WRpMFFz9drJnBF69tfqMrP3mpC3yUJ8Lf3AJByH5PgL3EUOAw2XaeqTroDdKeYM59TLv2wmXkpvSbon3cNSOyccpc45KCGndV' +
-    '1pKQfeiDDvZnHhvdDyUXGl2CZi9VTkVtTzvm7xVM3QyxZIWK17k/7Y0IAIdn6Mz/nP8Uy9fhcL//VcI5PlVdSZqa19dELnmC0c1g' +
-    'Bf94az68hYKN1d2LVtvVqyQL//Qz8dLbo6QSZwp07bscR1QeBHN/NH8foorWyFpyEfdOS5mKDCgaM+py958xm2vKY8mERV17VgL/' +
-    'P83VpjKzo64p/xfc526sVnct8bvXOno6HZwsI78jJjGn3LZhjk43B/w7hGZIRbDe53EYrxMI0IqmQktg9tiAcMDOroxhCJanf8aD' +
-    'qdIPcKo14CMv3wDVZf8RUhuGg3yX5Ds4yUKzFD/Ls0u4B3j/3IvTh7n8S828ffjayuh0Qt3LiWp9Cv7TJCPJLzCA6NWgxtqAAcYw' +
-    '5JXJfFSUVLjFiZBTc7vv+uJUJ3NlaXDPydpP7gb8mrpqGYVdrLQylflLGWTo7jTZTlY+Iks=';
+    'zFhVcphDNsqhnogUnH/BImVosuHsKbVpmsNh7za4tkcjrlASOX62OWQNgs7+xG7YjAqni26NVaGe/FePXfkEG2TTaiz8OdrdgX1x' +
+    'e8lV5MDD7egfvK7xRb2hz0ZPD4WNMEU++wRMoWdbIL45V4NRn10zUqPvVOgCc5t8q4N/vk8dUTDFVIBh1eGt6agPLeF9loFXYfsa' +
+    '5L5MR5xISTMXvoPQAOkeNq9iMi2aRnzJFZbZnwxZ/n4OgPXEY79B';
   function avvrang(text) {
     var bin = atob(text), slump = Advent.skapaSlump('kodkryss-forvrangning');
     var bytes = new Uint8Array(bin.length);
@@ -247,7 +242,7 @@
 
   function medalj(sek) { return sek < GULD ? 'guld' : sek < SILVER ? 'silver' : sek < BRONS ? 'brons' : ''; }
   function tidText(ms) { return Advent.formateraTid(Math.floor(ms / 1000)); }
-  function ledtradText(n) { return n + (n === 1 ? ' ledtråd' : ' ledtrådar'); }
+  function ledtradText(n) { return n + (n === 1 ? ' hint' : ' hints'); }
 
   // ===== Spelets tillstånd =====
   // Siffrorna 1..K delas ut till krysset bokstäver i slumpad ordning ur fröet.
@@ -315,12 +310,12 @@
       b.appendChild(el('span', 'b', s.slut === 'gavupp' ? c.toUpperCase() : visad(n).toUpperCase()));
       if (arLast(n)) b.classList.add('last');
       else if (!s.slut && vald === n) b.classList.add('samma');
-      b.setAttribute('aria-label', 'Siffra ' + n + (visad(n) ? ', ' + visad(n) : ', tom'));
+      b.setAttribute('aria-label', 'Number ' + n + (visad(n) ? ', ' + visad(n) : ', empty'));
       r.appendChild(b);
     }
     if (!s.startad && !s.slut) {
       var lager = el('div', 'startlager');
-      var k = el('button', 'knapp', 'Starta');
+      var k = el('button', 'knapp', 'Start');
       k.type = 'button';
       k.addEventListener('click', starta);
       lager.appendChild(k);
@@ -348,10 +343,10 @@
     var t = $('tangentbord'), anvanda = {};
     siffror().forEach(function (n) { if (visad(n)) anvanda[visad(n)] = true; });
     t.textContent = '';
-    ['qwertyuiopå', 'asdfghjklöä', 'zxcvbnm-'].forEach(function (rad) {
+    ['qwertyuiop', 'asdfghjkl', 'zxcvbnm-'].forEach(function (rad) {
       var r = el('div', 'tangentrad');
       rad.split('').forEach(function (b) {
-        var k = el('button', 'tangent', b === '-' ? 'Sudda' : b.toUpperCase());
+        var k = el('button', 'tangent', b === '-' ? 'Delete' : b.toUpperCase());
         k.type = 'button';
         k.dataset.b = b;
         if (b === '-') k.classList.add('sudda');
@@ -377,9 +372,9 @@
     $('visaSvar').hidden = !ovning || !!s.slut;
     var tips = '';
     if (s.slut) tips = '';
-    else if (!s.startad) tips = 'Klockan startar när du trycker på Starta.';
-    else if (allaIfyllda()) tips = 'Alla siffror har en bokstav, men något stämmer inte än.';
-    else if (!vald) tips = 'Tryck på en ruta och välj en bokstav.';
+    else if (!s.startad) tips = 'The clock starts when you tap Start.';
+    else if (allaIfyllda()) tips = 'Every number has a letter, but something isn’t right yet.';
+    else if (!vald) tips = 'Tap a square and pick a letter.';
     $('tips').textContent = tips;
     ritaSlut();
   }
@@ -388,15 +383,15 @@
     $('slut').hidden = !s.slut;
     if (!s.slut) return;
     if (s.slut === 'gavupp') {
-      $('slutRubrik').textContent = ovning ? 'Här är svaret' : 'Du gav upp';
+      $('slutRubrik').textContent = ovning ? 'Here’s the answer' : 'You gave up';
       $('slutPoang').textContent = '';
-      $('slutText').textContent = ovning ? 'Facit står i rutnätet.' : 'Facit står i rutnätet. Testa gärna att öva med ett annat kryss.';
+      $('slutText').textContent = ovning ? 'The answer is in the grid.' : 'The answer is in the grid. Feel free to practice with another puzzle.';
       return;
     }
     var tot = totalTid(), m = medalj(tot / 1000);
-    $('slutRubrik').textContent = 'Krysset är knäckt!';
+    $('slutRubrik').textContent = 'Puzzle cracked!';
     $('slutPoang').textContent = tidText(tot);
-    $('slutText').textContent = (s.ledtradar ? 'Med ' + ledtradText(s.ledtradar) + ' (+' + s.ledtradar * 30 + ' s). ' : 'Utan ledtrådar. ') +
+    $('slutText').textContent = (s.ledtradar ? 'With ' + ledtradText(s.ledtradar) + ' (+' + s.ledtradar * 30 + ' s). ' : 'No hints. ') +
       (m ? { guld: '🥇 Gold!', silver: '🥈 Silver!', brons: '🥉 Bronze!' }[m] : 'No medal this time.');
   }
 
@@ -437,10 +432,10 @@
 
   function skriv(b) {
     if (!spelbart()) return;
-    if (!vald) { $('tips').textContent = 'Tryck först på en ruta.'; return; }
-    if (arLast(vald)) { $('tips').textContent = 'Den siffran är redan klar.'; return; }
+    if (!vald) { $('tips').textContent = 'Tap a square first.'; return; }
+    if (arLast(vald)) { $('tips').textContent = 'That number is already done.'; return; }
     // En bokstav som är låst på en annan siffra kan inte användas igen.
-    if (s.last.some(function (n) { return bokstav[n] === b; })) { $('tips').textContent = b.toUpperCase() + ' är redan låst på en annan siffra.'; return; }
+    if (s.last.some(function (n) { return bokstav[n] === b; })) { $('tips').textContent = b.toUpperCase() + ' is already locked to another number.'; return; }
     Object.keys(s.gissat).forEach(function (n) { if (s.gissat[n] === b) delete s.gissat[n]; });
     s.gissat[vald] = b;
     sparaDagens();
@@ -488,7 +483,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey || !spelbart()) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-    if (/^[a-zåäö]$/i.test(e.key)) { e.preventDefault(); skriv(e.key.toLowerCase()); return; }
+    if (/^[a-z]$/i.test(e.key)) { e.preventDefault(); skriv(e.key.toLowerCase()); return; }
     if (e.key === 'Backspace' || e.key === 'Delete') { e.preventDefault(); sudda(); return; }
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
@@ -535,7 +530,7 @@
     stoppaKlockan();
     ovning = arOvning;
     vald = null;
-    $('under').textContent = ovning ? 'Fritt spel, räknas inte' : 'Day ' + dag;
+    $('under').textContent = ovning ? 'Free play, doesn’t count' : 'Day ' + dag;
     $('ovningsmarke').hidden = !ovning;
     $('tillDagens').hidden = !ovning;
     $('skickat').textContent = '';
@@ -552,7 +547,7 @@
   }
 
   $('geUpp').addEventListener('click', function () {
-    Advent.fraga({ rubrik: 'Vill du ge upp?', text: 'Då räknas inte dagens försök.', ja: 'Ge upp', nej: 'Spela vidare' })
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then today’s try won’t count.', ja: 'Give up', nej: 'Keep playing' })
       .then(function (ok) {
         if (!ok) return;
         avsluta('gavupp');
