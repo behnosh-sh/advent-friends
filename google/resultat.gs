@@ -8,8 +8,9 @@
 // Flikar som scriptet använder (skapas av installera() om de saknas):
 //   Spelare:  Namn | Kod
 //   Resultat: Tidsstämpel | Dag | Spel | Spelare | Status | Värde | Medalj | Text
-//   Familjen: Behnoshs rader från familjens ark, samma kolumner. Fylls av det separata scriptet
-//             kopiera-behnosh.gs (läser familjens ark, ändrar det aldrig). Det här scriptet bara läser fliken.
+//   Familjen: Behnoshs rader från familjens ark, samma kolumner. Fylls av en formel (IMPORTRANGE + QUERY) som
+//             installera() lägger i cell A1. Formeln läser familjens ark och ändrar det aldrig, och det här
+//             scriptet läser bara fliken. Inget script behöver komma åt familjens ark.
 //
 // Behnosh spelar bara familjens kalender. Hennes jämförbara dagar läses från fliken Familjen (texten görs om
 // till engelska), och dagar som inte går att jämföra (STRECK_DAGAR) får en rad "–" åt henne. Hon kan aldrig
@@ -18,6 +19,8 @@
 var FLIK_SPELARE = 'Spelare';
 var FLIK_RESULTAT = 'Resultat';
 var FLIK_FAMILJEN = 'Familjen';
+// Fyll i adressen till familjens resultatark innan du kör installera() (https://docs.google.com/spreadsheets/d/...).
+var FAMILJENS_ARK = '';
 var BEHNOSH = 'Behnosh';            // namnet i fliken Spelare (och i familjens ark)
 var STRECK_DAGAR = [7, 16, 21];     // Mönsterdagen, Kodkryss, Wordle: annat innehåll än familjens
 var MAX_FEL_PER_TIMME = 10;
@@ -36,7 +39,15 @@ function installera() {
     [BEHNOSH, 'Friend 1', 'Friend 2', 'Friend 3', 'Friend 4', 'Friend 5'].forEach(function (namn) { s.appendRow([namn, '']); });
   }
   if (!ark.getSheetByName(FLIK_RESULTAT)) ark.insertSheet(FLIK_RESULTAT).appendRow(KOLUMNER);
-  if (!ark.getSheetByName(FLIK_FAMILJEN)) ark.insertSheet(FLIK_FAMILJEN).appendRow(KOLUMNER);
+  var familjen = ark.getSheetByName(FLIK_FAMILJEN) || ark.insertSheet(FLIK_FAMILJEN);
+  if (FAMILJENS_ARK) {
+    // Bara Behnoshs rader hämtas. Första gången: tryck på cell A1 i fliken Familjen och välj "Tillåt åtkomst".
+    familjen.clearContents();
+    familjen.getRange('A1').setFormula('=QUERY(IMPORTRANGE("' + FAMILJENS_ARK.replace(/"/g, '') + '", "Resultat!A:H"), ' +
+      '"select * where Col4 = \'' + BEHNOSH + '\'", 1)');
+  } else {
+    Logger.log('FAMILJENS_ARK är tom: fyll i den och kör installera() igen för att hämta dina resultat.');
+  }
 }
 
 // Sidan skickar allt som POST med JSON i kroppen (text/plain, så att webbläsaren inte gör en förfrågan i förväg).
