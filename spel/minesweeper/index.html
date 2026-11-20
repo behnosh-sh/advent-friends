@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14233F">
+<title>Minesweeper – Advent Calendar</title>
+<link rel="stylesheet" href="../../css/gemensam.css?v=7">
+<style>
+/* Minfältets egna färger bygger på de gemensamma (gemensam.css). */
+:root {
+  --ruta: var(--gran-3);
+  --ruta-kant: var(--gran-2);
+  --oppen: #FFFDF8;
+  --oppen-kant: #EADFCF;
+  --rod: #D9534F;
+}
+html, body { height: 100%; }
+body { overscroll-behavior: none; }
+button { font-family: inherit; color: inherit; cursor: pointer; }
+.app { display: flex; flex-direction: column; min-height: 100dvh; padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+.app.spelar { height: 100dvh; min-height: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+h1 { margin: 4px 0 2px; font-size: 30px; line-height: 1.1; }
+.under { margin: 0 0 14px; color: var(--accent); font-size: 14px; }
+.app.spelar .under { margin-bottom: 10px; }
+.ovning { display: inline-block; margin-left: 6px; padding: 2px 10px; border-radius: 999px; background: var(--glod); color: var(--text); font: 600 13px var(--text-typsnitt); vertical-align: middle; }
+
+/* Startkortet */
+.intro-kort { text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.intro-kort .storlek { font: 600 24px var(--text-typsnitt); }
+.intro-kort .rad { margin-top: -6px; font-size: 16px; color: var(--dampad); }
+.granser { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.grans { display: flex; align-items: center; gap: 6px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.grans .medalj { width: auto; font-size: 20px; }
+.basta { font-size: 16px; color: var(--gron-mork); font-weight: 600; }
+.basta:empty { display: none; }
+.tavla { margin-top: 16px; }
+.regler { margin-top: 16px; }
+.regler h2 { margin: 0 0 6px; font-size: 18px; }
+.regler ol { margin: 0; padding-left: 22px; line-height: 1.45; }
+.regler .info { margin: 10px 0 0; font-size: 14px; color: var(--dampad); }
+.knappar { display: grid; gap: 12px; margin: 16px 0; }
+
+/* Spelvyn */
+.spel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+.matare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+.matare div { background: rgba(255,255,255,.08); border-radius: 14px; padding: 6px 8px; text-align: center; }
+.matare span { display: block; font-size: 14px; color: var(--himmel-dampad); }
+.matare b { display: block; font: 600 24px var(--text-typsnitt); font-variant-numeric: tabular-nums; }
+.bana-ram {
+  flex: 1; min-height: 0;
+  overflow: auto;
+  border-radius: 16px;
+  background: var(--kort);
+  box-shadow: 0 4px 0 rgba(0,0,0,.25);
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.bana-ram.drar { cursor: grabbing; }
+.bana {
+  display: grid;
+  gap: 0;
+  padding: 10px;
+  width: max-content;
+  margin: 0 auto;
+}
+.c {
+  -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+  width: var(--cs); height: var(--cs);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--text-typsnitt);
+  font-weight: 600;
+  font-size: calc(var(--cs) * 0.62);
+  line-height: 1;
+  background: var(--ruta);
+  border: 1px solid var(--ruta-kant);
+  border-radius: calc(var(--cs) * 0.18);
+  box-shadow: inset 0 calc(var(--cs) * -0.1) 0 rgba(0,0,0,.12);
+}
+.c.o { background: var(--oppen); border-color: var(--oppen-kant); box-shadow: none; border-radius: 0; }
+.c.f::after { content: "🚩"; font-size: calc(var(--cs) * 0.58); }
+.c.m { background: var(--oppen); border-color: var(--oppen-kant); box-shadow: none; }
+.c.m::after { content: "💣"; font-size: calc(var(--cs) * 0.6); }
+.c.boom { background: var(--rod); }
+.c.fel::after { content: "❌"; font-size: calc(var(--cs) * 0.5); }
+.c.start { outline: 3px solid var(--guld); outline-offset: -3px; }
+.c.start::after { content: "★"; color: #E0A800; font-size: calc(var(--cs) * 0.6); }
+.n1 { color: #2F6FD0; } .n2 { color: #2E8B45; } .n3 { color: #D03A3A; } .n4 { color: #23318C; }
+.n5 { color: #8C2B23; } .n6 { color: #1F8C8C; } .n7 { color: #333; } .n8 { color: #888; }
+
+.kontroller { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.kontroller button {
+  border: 0; background: var(--kort); color: var(--text); border-radius: 14px; box-shadow: 0 3px 0 rgba(0,0,0,.25);
+  height: 48px; min-width: 48px; font-size: 22px; font-weight: 600;
+}
+.kontroller button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+.kontroller .tips { flex: 1; font-size: 14px; line-height: 1.25; color: var(--himmel-dampad); text-align: center; }
+.c.trycks { filter: brightness(1.12); transform: scale(0.92); transition: transform .3s; }
+
+/* Resultatet efter en runda, som i de andra spelen */
+.slut { text-align: center; }
+.slut h2 { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.slut .poang { margin: 0; font: 600 24px var(--text-typsnitt); }
+.slut p { margin: 4px 0; }
+.slut .info { color: var(--dampad); font-size: 14px; }
+.slut .info:empty { display: none; }
+.slut .rekord { font-weight: 600; color: var(--gron-mork); }
+.slut .rekord:empty { display: none; }
+</style>
+</head>
+<body>
+<main class="app spalt" id="app">
+  <a class="tillbaka" href="../../">← Calendar</a>
+  <h1>Minesweeper <span class="ovning" id="ovningsmarke" hidden>Practice</span></h1>
+  <p class="under" id="under"></p>
+
+  <!-- Startvy -->
+  <div id="intro">
+    <div class="kort intro-kort">
+      <div class="storlek" id="i-storlek"></div>
+      <div class="rad" id="i-grans"></div>
+      <div class="granser" id="i-medaljer"></div>
+      <div class="basta" id="i-basta"></div>
+      <button class="knapp" id="startknapp">Start today’s board</button>
+    </div>
+    <div id="i-tavlaplats"></div>
+    <div class="knappar" id="i-gavupp-rad" hidden>
+      <button class="knapp diskret" id="i-gavupp">I give up, show the results</button>
+    </div>
+    <details class="regler kort">
+      <summary><h2>How to play</h2></summary>
+      <ol>
+        <li>The board starts with an open area at ★. It can always be solved without guessing.</li>
+        <li>Tap a green square to dig. Press and hold (or right-click) to place a flag, and tap the flag to remove it.</li>
+        <li>Tap a number that has all its flags around it, and the rest of its neighbors open.</li>
+        <li>Drag to move the board, + and − to zoom.</li>
+        <li>Fastest wins. Gold, silver and bronze are based on how big and hard today’s board is.</li>
+      </ol>
+      <p class="info">Only your first finished attempt on today’s board counts on the scoreboard.</p>
+    </details>
+    <div class="knappar">
+      <button class="knapp diskret" id="ovningsknapp">Practice</button>
+    </div>
+  </div>
+
+  <!-- Spelvy -->
+  <div class="spel" id="spel">
+    <div class="matare">
+      <div><span>Mines</span><b id="s-minor"></b></div>
+      <div><span>Time</span><b id="s-tid"></b></div>
+      <div><span>Board</span><b id="s-bana"></b></div>
+    </div>
+    <div class="bana-ram" id="ram"><div class="bana" id="bana"></div></div>
+    <div class="kontroller">
+      <button id="zoom-ut" aria-label="Zoom out">−</button>
+      <button id="zoom-in" aria-label="Zoom in">+</button>
+      <span class="tips">Press and hold = flag<br>Tap a number = open around it</span>
+      <button id="avbryt" aria-label="Quit" style="font-size:18px">✕</button>
+    </div>
+  </div>
+
+  <!-- Resultat -->
+  <section id="resultat" hidden>
+    <div class="slut kort">
+      <h2><span id="r-medalj" hidden></span><span id="r-rubrik"></span></h2>
+      <p class="poang" id="r-poang"></p>
+      <p id="r-text"></p>
+      <p class="info" id="r-bana"></p>
+      <p class="rekord" id="r-rekord"></p>
+      <p class="info" id="r-skickat"></p>
+    </div>
+    <div id="r-tavlaplats"></div>
+    <div class="knappar">
+      <button class="knapp" id="r-igen">Try again</button>
+      <button class="knapp ljus" id="r-tillbaka">Back to the day</button>
+      <button class="knapp diskret" id="r-ovning">Practice</button>
+      <button class="knapp diskret" id="r-gavupp" hidden>I give up, show the results</button>
+    </div>
+  </section>
+
+  <section id="tavla"></section>
+</main>
+
+<script src="../../js/gemensam.js?v=6"></script>
+<script src="../../js/luckor.js?v=27"></script>
+<script src="../../js/resultat.js?v=4"></script>
+<script>
+// ===== Inställningar =====
+// Fröet för varje dag hämtas från den gemensamma koden (js/gemensam.js, Advent.froForDag),
+// så att det kan bytas på ett ställe för hela kalendern. Reservvärdet nedan används bara
+// om den gemensamma filen saknas.
+const FRO_PREFIX = "advent-2026-2d688d1c3ab1-dag-";
+const froForDag = n => (window.Advent && Advent.froForDag) ? Advent.froForDag(n) : FRO_PREFIX + n;
+
+// Medaljgränser i sekunder räknas från banans 3BV (minsta antal klick) och antal minor.
+const SEK_PER_3BV = 1.1;   // ungefärligt tempo för guld på mobil
+const SEK_PER_MINA = 0.4;  // extra tid för att tänka/flagga
+const SILVER_FAKTOR = 1.3;
+const BRONS_FAKTOR = 1.7;
+
+// Dagens bana är alltid en lättare bana, så att hela familjen kan klara den.
+const DAGENS_PROFIL = { namn: "Easy", b: [9, 10], h: [12, 14], d: [0.13, 0.14] };
+
+// Övningsbanor: bredd (max 16 för stående mobil), höjd och mindensitet.
+const PROFILER = [
+  { namn: "Easy",      b: [9, 11],  h: [12, 16], d: [0.14, 0.16] },
+  { namn: "Medium",    b: [12, 14], h: [16, 22], d: [0.17, 0.19] },
+  { namn: "Hard",      b: [14, 16], h: [20, 28], d: [0.19, 0.21] },
+  { namn: "Tall",      b: [10, 12], h: [26, 32], d: [0.17, 0.19] },
+  { namn: "Wide",      b: [16, 16], h: [16, 20], d: [0.18, 0.20] },
+];
+
+// ===== Slump med frö =====
+function hash128(str) {
+  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
+  for (let i = 0; i < str.length; i++) {
+    const k = str.charCodeAt(i);
+    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+  }
+  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+  h1 ^= (h2 ^ h3 ^ h4); h2 ^= h1; h3 ^= h1; h4 ^= h1;
+  return [h1 >>> 0, h2 >>> 0, h3 >>> 0, h4 >>> 0];
+}
+function sfc32(a, b, c, d) {
+  return function () {
+    a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+    let t = (a + b) | 0;
+    a = b ^ (b >>> 9);
+    b = (c + (c << 3)) | 0;
+    c = (c << 21) | (c >>> 11);
+    d = (d + 1) | 0;
+    t = (t + d) | 0;
+    c = (c + t) | 0;
+    return (t >>> 0) / 4294967296;
+  };
+}
+function rngFran(text) { const s = hash128(text); return sfc32(s[0], s[1], s[2], s[3]); }
+const heltal = (rng, lo, hi) => lo + Math.floor(rng() * (hi - lo + 1));
+
+// ===== Bana =====
+function grannar(W, H, i) {
+  const x = i % W, y = (i / W) | 0, ut = [];
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    if (!dx && !dy) continue;
+    const nx = x + dx, ny = y + dy;
+    if (nx >= 0 && ny >= 0 && nx < W && ny < H) ut.push(ny * W + nx);
+  }
+  return ut;
+}
+
+function raknaSiffror(W, H, minor) {
+  const n = new Int8Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    if (minor[i]) { n[i] = -1; continue; }
+    let c = 0; for (const j of grannar(W, H, i)) c += minor[j];
+    n[i] = c;
+  }
+  return n;
+}
+
+// Öppnar ett område från cell i (flood fill över nollor). Returnerar de öppnade cellerna.
+function floodOppna(W, H, siffror, oppen, i) {
+  const nya = [], stack = [i];
+  while (stack.length) {
+    const k = stack.pop();
+    if (oppen[k]) continue;
+    oppen[k] = 1; nya.push(k);
+    if (siffror[k] === 0) for (const j of grannar(W, H, k)) if (!oppen[j]) stack.push(j);
+  }
+  return nya;
+}
+
+// Enkel lösare: går banan att lösa från startrutan utan att gissa?
+function gaarAttLosa(W, H, siffror, antalMinor, start) {
+  const N = W * H, oppen = new Uint8Array(N), flagg = new Uint8Array(N);
+  floodOppna(W, H, siffror, oppen, start);
+  const nb = []; for (let i = 0; i < N; i++) nb.push(grannar(W, H, i));
+  const sakra = N - antalMinor;
+  let oppnade = 0; for (let i = 0; i < N; i++) oppnade += oppen[i];
+  let flaggor = 0;
+  const oppna = i => { if (siffror[i] < 0) return false; const r = floodOppna(W, H, siffror, oppen, i); oppnade += r.length; return true; };
+  const flagga = i => { if (!flagg[i]) { flagg[i] = 1; flaggor++; } };
+
+  while (oppnade < sakra) {
+    let framsteg = false;
+    // Bygg begränsningar: (okända grannar, kvarvarande minor)
+    const krav = [];
+    for (let i = 0; i < N; i++) {
+      if (!oppen[i] || siffror[i] <= 0) continue;
+      const ok = []; let f = 0;
+      for (const j of nb[i]) { if (flagg[j]) f++; else if (!oppen[j]) ok.push(j); }
+      if (!ok.length) continue;
+      const r = siffror[i] - f;
+      if (r === 0) { for (const j of ok) oppna(j); framsteg = true; }
+      else if (r === ok.length) { for (const j of ok) flagga(j); framsteg = true; }
+      else krav.push({ i, ok, r, set: new Set(ok) });
+    }
+    if (framsteg) continue;
+    // Delmängdsregeln mellan närliggande siffror
+    const perCell = new Map();
+    krav.forEach((k, idx) => k.ok.forEach(c => { if (!perCell.has(c)) perCell.set(c, []); perCell.get(c).push(idx); }));
+    for (let a = 0; a < krav.length && !framsteg; a++) {
+      const A = krav[a], kandidater = new Set();
+      for (const c of A.ok) for (const b of perCell.get(c)) if (b !== a) kandidater.add(b);
+      for (const b of kandidater) {
+        const B = krav[b];
+        // A ⊆ B ?
+        if (A.ok.length < B.ok.length && A.ok.every(c => B.set.has(c))) {
+          const diff = B.ok.filter(c => !A.set.has(c)), behov = B.r - A.r;
+          if (behov === 0) { diff.forEach(oppna); framsteg = true; break; }
+          if (behov === diff.length) { diff.forEach(flagga); framsteg = true; break; }
+        }
+        // Överlapp: B har minst B.r - |B\A| minor i A∩B; om det är lika med A.r är A\B säkra.
+        const snitt = A.ok.filter(c => B.set.has(c));
+        const bUtan = B.ok.length - snitt.length, aUtan = A.ok.filter(c => !B.set.has(c));
+        const minISnitt = B.r - bUtan;
+        if (minISnitt > 0 && minISnitt === A.r && aUtan.length) { aUtan.forEach(oppna); framsteg = true; break; }
+        if (aUtan.length && A.r - Math.min(B.r, snitt.length) === aUtan.length) { aUtan.forEach(flagga); framsteg = true; break; }
+      }
+    }
+    if (framsteg) continue;
+    // Globalt: alla minor hittade, eller bara minor kvar
+    const kvar = antalMinor - flaggor;
+    const okanda = []; for (let i = 0; i < N; i++) if (!oppen[i] && !flagg[i]) okanda.push(i);
+    if (kvar === 0) { okanda.forEach(oppna); continue; }
+    if (kvar === okanda.length) { okanda.forEach(flagga); continue; }
+    return false;
+  }
+  return true;
+}
+
+// 3BV: antal öppningar + siffror som inte ligger intill en öppning. Startområdet räknas inte.
+function berakna3BV(W, H, siffror, start) {
+  const N = W * H, mark = new Uint8Array(N);
+  let bv = 0;
+  for (let i = 0; i < N; i++) if (siffror[i] === 0 && !mark[i]) { bv++; floodOppna(W, H, siffror, mark, i); }
+  for (let i = 0; i < N; i++) if (siffror[i] > 0 && !mark[i]) bv++;
+  return Math.max(1, bv - 1);
+}
+
+function skapaBana(froText, profil) {
+  const rng = rngFran(froText);
+  const p = profil || PROFILER[Math.floor(rng() * PROFILER.length)];
+  const W = heltal(rng, p.b[0], p.b[1]);
+  const H = heltal(rng, p.h[0], p.h[1]);
+  const d = p.d[0] + rng() * (p.d[1] - p.d[0]);
+  const antal = Math.round(W * H * d);
+  const N = W * H;
+  let senast = null;
+  for (let forsok = 0; forsok < 3000; forsok++) {
+    // Startruta en bit in från kanten, en 3x3-ruta runt den blir minfri
+    const sx = heltal(rng, 1, W - 2), sy = heltal(rng, Math.floor(H * 0.25), Math.ceil(H * 0.75) - 1);
+    const start = sy * W + sx;
+    const fritt = new Set([start, ...grannar(W, H, start)]);
+    const platser = []; for (let i = 0; i < N; i++) if (!fritt.has(i)) platser.push(i);
+    for (let i = platser.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [platser[i], platser[j]] = [platser[j], platser[i]]; }
+    const minor = new Uint8Array(N);
+    for (let k = 0; k < antal; k++) minor[platser[k]] = 1;
+    const siffror = raknaSiffror(W, H, minor);
+    senast = { W, H, antal, minor, siffror, start, typ: p.namn };
+    // Startområdet ska vara så stort att man kommer igång direkt
+    const startYta = floodOppna(W, H, siffror, new Uint8Array(N), start).length;
+    if (startYta < Math.max(12, Math.round(N * 0.06)) && forsok < 2500) continue;
+    if (gaarAttLosa(W, H, siffror, antal, start)) { senast.forsok = forsok + 1; break; }
+  }
+  const bv = berakna3BV(senast.W, senast.H, senast.siffror, senast.start);
+  const guld = Math.round(bv * SEK_PER_3BV + senast.antal * SEK_PER_MINA);
+  senast.bv = bv;
+  senast.guld = guld;
+  senast.silver = Math.round(guld * SILVER_FAKTOR);
+  senast.brons = Math.round(guld * BRONS_FAKTOR);
+  return senast;
+}
+
+// ===== Sidan =====
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+let dag = parseInt(params.get("dag"), 10);
+if (!(dag >= 1 && dag <= 24)) dag = 10;
+const dagensFro = froForDag(dag);
+try { if (window.Advent && Advent.markeraOppnad) Advent.markeraOppnad(dag); } catch (e) {}
+// Banversionen ingår i nycklarna, så att sparade tider från en äldre (svårare) bana glöms.
+const BANVERSION = "latt";
+const lagringsNyckel = Advent.LAGRING_PREFIX + "minesweeper-basta:" + BANVERSION + ":" + dagensFro;
+
+const lasBasta = () => { try { const v = parseFloat(localStorage.getItem(lagringsNyckel)); return isFinite(v) ? v : null; } catch (e) { return null; } };
+const sparaBasta = t => { try { localStorage.setItem(lagringsNyckel, String(t)); } catch (e) {} };
+
+const fmt = t => t.toFixed(1);
+function medaljFor(t, b) {
+  if (t <= b.guld) return "guld";
+  if (t <= b.silver) return "silver";
+  if (t <= b.brons) return "brons";
+  return null;
+}
+const MEDALJ_NAMN = { guld: "Gold", silver: "Silver", brons: "Bronze" };
+const MEDALJ_EMOJI = { guld: "🥇", silver: "🥈", brons: "🥉" };
+
+const dagens = skapaBana(dagensFro, DAGENS_PROFIL);
+
+// ===== Gemensam resultattavla =====
+// Det första klarade försöket på dagens bana sparas och skickas till tavlan (js/resultat.js).
+// Är man inte inloggad än skickas det när man har skrivit in sin kod.
+const PROV = !!(window.Advent && Advent.Prov && Advent.Prov.aktiv);
+const R = window.Advent && Advent.Resultat;
+const lasa = (k, std) => (window.Advent ? Advent.lasa(k, std) : std);
+const spara = (k, v) => { if (window.Advent) Advent.spara(k, v); };
+const forstaNyckel = "minesweeper-forsta:" + BANVERSION + ":" + dagensFro;
+const forsokNyckel = "minesweeper-forsok:" + BANVERSION + ":" + dagensFro;
+let tavlaStatus;   // undefined = vet inte än, null = inte inloggad, annars dagens data (harSpelat)
+let skickar = false;
+
+function forstaVinst() { return lasa(forstaNyckel, null); }
+function kanSkicka() { return !!(R && R.arInkopplad() && R.kod() && tavlaStatus && !tavlaStatus.harSpelat); }
+
+function forsokSkicka() {
+  const f = forstaVinst();
+  if (!f || f.skickad || skickar || !kanSkicka()) { uppdateraTavlaKnappar(); return; }
+  skickar = true;
+  R.skicka({ dag, spel: "minesweeper", status: "klar", varde: f.varde, medalj: f.medalj, text: f.text })
+    .then(() => {
+      f.skickad = true; spara(forstaNyckel, f);
+      $("r-skickat").textContent = "Your result is on the scoreboard.";
+    }, fel => { $("r-skickat").textContent = fel.message; })
+    .then(() => { skickar = false; uppdateraTavlaKnappar(); });
+}
+
+function geUpp() {
+  if (!kanSkicka() || forstaVinst()) return;
+  Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
+    .then(function (ok) {
+      if (!ok) return;
+      R.skicka({ dag, spel: "minesweeper", status: "gav upp", medalj: "", text: "" })
+        .then(() => { $("r-skickat").textContent = ""; }, fel => { alert(fel.message); });
+    });
+}
+
+// "Ge upp" syns bara när man är inloggad, inte har skickat något och inte har klarat banan.
+function uppdateraTavlaKnappar() {
+  const syns = kanSkicka() && !forstaVinst();
+  $("i-gavupp-rad").hidden = !syns;
+  $("r-gavupp").hidden = !syns || !$("resultat").dataset.forlust;
+}
+
+if (R && !PROV) {
+  R.tavla($("tavla"), dag, { vidStatus: d => { tavlaStatus = d; forsokSkicka(); }, sparNyckel: forstaNyckel });
+} else {
+  $("tavla").hidden = true;
+}
+
+function placeraTavla(plats) {
+  if (!R) return;
+  if (plats) { $(plats).appendChild($("tavla")); $("tavla").hidden = false; }
+  else $("tavla").hidden = true;
+}
+
+// Rubriken under "Minesweeper": lucknumret, eller att det är en övningsbana.
+function visaUnder(ovning) {
+  $("under").textContent = ovning ? "Random board, doesn’t count" : "Day " + dag;
+  $("ovningsmarke").hidden = !ovning;
+}
+
+function visaIntro() {
+  $("app").classList.remove("spelar");
+  visaUnder(false);
+  $("i-storlek").textContent = `${dagens.W} × ${dagens.H} · ${dagens.antal} mines`;
+  $("i-grans").textContent = `${dagens.typ} · No time limit`;
+  $("i-medaljer").innerHTML = ["guld", "silver", "brons"].map(m =>
+    `<span class="grans"><span class="medalj ${m}" aria-label="${MEDALJ_NAMN[m]}">${MEDALJ_EMOJI[m]}</span>${dagens[m]} s</span>`).join("");
+  const b = lasBasta();
+  if (b != null) {
+    const m = medaljFor(b, dagens);
+    $("i-basta").textContent = `Your best time: ${fmt(b)} s${m ? " · " + MEDALJ_NAMN[m] : ""}`;
+  } else $("i-basta").textContent = "";
+  $("intro").style.display = "";
+  $("spel").style.display = "none";
+  $("resultat").hidden = true;
+  placeraTavla("i-tavlaplats");
+  uppdateraTavlaKnappar();
+  window.scrollTo(0, 0);
+}
+
+// ===== Spelet =====
+let spel = null, cellEl = [], timer = null;
+let cellStorlek = 0, zoomNiva = 0, zoomSteg = [];
+const STARTSTORLEK = 34;          // px per ruta från början, lagom för ett finger
+const ZOOM_STORLEKAR = [28, 34, 42, 52];
+
+// Zoomstegen: "hela bredden syns" plus några fasta storlekar som är större än så.
+function raknaZoomSteg() {
+  const passar = Math.max(14, Math.floor(($("ram").clientWidth - 20) / spel.bana.W));
+  zoomSteg = [passar, ...ZOOM_STORLEKAR.filter(s => s > passar)];
+}
+function satStorlek() {
+  cellStorlek = zoomSteg[zoomNiva];
+  $("bana").style.setProperty("--cs", cellStorlek + "px");
+}
+
+function startaSpel(bana, ovning) {
+  spel = {
+    bana, ovning,
+    oppen: new Uint8Array(bana.W * bana.H),
+    flagg: new Uint8Array(bana.W * bana.H),
+    flaggor: 0, oppnade: 0, slut: false, startTid: 0,
+  };
+  if (!ovning) spara(forsokNyckel, lasa(forsokNyckel, 0) + 1);
+  $("app").classList.add("spelar");
+  $("intro").style.display = "none";
+  $("resultat").hidden = true;
+  placeraTavla(null);
+  $("spel").style.display = "flex";
+  visaUnder(ovning);
+  $("s-bana").textContent = `${bana.W}×${bana.H}`;
+  const el = $("bana");
+  el.style.gridTemplateColumns = `repeat(${bana.W}, var(--cs))`;
+  el.innerHTML = "";
+  cellEl = [];
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < bana.W * bana.H; i++) {
+    const c = document.createElement("div");
+    c.className = "c"; c.dataset.i = i;
+    frag.appendChild(c); cellEl.push(c);
+  }
+  el.appendChild(frag);
+  raknaZoomSteg();
+  zoomNiva = Math.max(0, zoomSteg.findIndex(s => s >= STARTSTORLEK));
+  satStorlek();
+  // Öppna startområdet
+  oppnaCell(bana.start, true);
+  uppdateraMinor();
+  // Scrolla så att startrutan syns
+  requestAnimationFrame(() => {
+    const c = cellEl[bana.start], r = $("ram");
+    r.scrollTop = c.offsetTop - r.clientHeight / 2;
+    r.scrollLeft = c.offsetLeft - r.clientWidth / 2;
+  });
+  // Klockan startar vid första trycket på banan (se tryck), inte när banan visas.
+  clearInterval(timer);
+  timer = setInterval(tick, 100);
+  tick();
+}
+
+function tid() { return spel.startTid ? (performance.now() - spel.startTid) / 1000 : 0; }
+function tick() {
+  if (!spel || spel.slut) return;
+  $("s-tid").textContent = fmt(tid());
+}
+function uppdateraMinor() { $("s-minor").textContent = spel.bana.antal - spel.flaggor; }
+
+function ritaCell(i) {
+  const c = cellEl[i], b = spel.bana;
+  if (spel.oppen[i]) {
+    const n = b.siffror[i];
+    c.className = "c o" + (n > 0 ? " n" + n : "");
+    c.textContent = n > 0 ? n : "";
+  } else {
+    c.className = "c" + (spel.flagg[i] ? " f" : "");
+    c.textContent = "";
+  }
+}
+
+function oppnaCell(i, forsta) {
+  const b = spel.bana;
+  if (spel.oppen[i] || spel.flagg[i]) return;
+  if (b.minor[i]) { avsluta(false, "mina", i); return; }
+  const nya = floodOppna(b.W, b.H, b.siffror, spel.oppen, i);
+  for (const k of nya) {
+    if (spel.flagg[k]) { spel.flagg[k] = 0; spel.flaggor--; }
+    ritaCell(k);
+  }
+  spel.oppnade += nya.length;
+  if (forsta) cellEl[i].classList.add("start");
+  if (spel.oppnade === b.W * b.H - b.antal) avsluta(true);
+}
+
+function vaxlaFlagga(i) {
+  if (spel.oppen[i]) return;
+  spel.flagg[i] ^= 1;
+  spel.flaggor += spel.flagg[i] ? 1 : -1;
+  ritaCell(i); uppdateraMinor();
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+
+// Tryck på en siffra som har alla sina flaggor: öppna resten av grannarna.
+function oppnaRunt(i) {
+  const b = spel.bana;
+  const nb = grannar(b.W, b.H, i);
+  const f = nb.filter(j => spel.flagg[j]).length;
+  if (f !== b.siffror[i]) return;
+  for (const j of nb) { if (spel.slut) return; if (!spel.oppen[j] && !spel.flagg[j]) oppnaCell(j); }
+}
+
+// Efter ett långt tryck ignoreras nya tryck på samma ruta en stund. Vissa mobiler
+// (iPhone) skickar ett extra tryck när fingret släpps, som annars tog bort flaggan igen.
+let sparrCell = -1, sparrTill = 0;
+const SPARR_TID = 700;
+
+function tryck(i, flagga) {
+  if (!spel || spel.slut) return;
+  if (i === sparrCell && performance.now() < sparrTill) return;
+  if (!spel.startTid) spel.startTid = performance.now();
+  if (spel.oppen[i]) { if (spel.bana.siffror[i] > 0) oppnaRunt(i); return; }
+  if (flagga || spel.flagg[i]) vaxlaFlagga(i); else oppnaCell(i);
+}
+
+function avsluta(vann, orsak, smallCell) {
+  if (spel.slut) return;
+  spel.slut = true;
+  clearInterval(timer);
+  const t = tid();
+  const b = spel.bana;
+  // Visa alla minor
+  for (let i = 0; i < b.W * b.H; i++) {
+    if (b.minor[i] && !spel.flagg[i]) cellEl[i].className = vann ? "c f" : "c m";
+    if (!b.minor[i] && spel.flagg[i] && !vann) cellEl[i].className = "c fel";
+  }
+  if (smallCell != null) cellEl[smallCell].classList.add("boom");
+  if (vann) { spel.flaggor = b.antal; uppdateraMinor(); }
+  setTimeout(() => visaResultat(vann, orsak, t), vann ? 700 : 1100);
+}
+
+function visaResultat(vann, orsak, t) {
+  const b = spel.bana, ovning = spel.ovning;
+  $("app").classList.remove("spelar");
+  $("spel").style.display = "none";
+  $("resultat").hidden = false;
+  $("resultat").dataset.forlust = vann ? "" : "1";
+  $("r-igen").hidden = ovning && !PROV;
+  $("r-rekord").textContent = "";
+  $("r-skickat").textContent = "";
+  $("r-bana").textContent = `Board ${b.W}×${b.H} with ${b.antal} mines` +
+    (ovning ? ` (${b.typ.toLowerCase()}).` : `, attempt ${lasa(forsokNyckel, 1)}.`);
+  const medaljEl = $("r-medalj");
+
+  if (vann) {
+    const m = medaljFor(t, b);
+    medaljEl.hidden = !m;
+    if (m) { medaljEl.className = "medalj " + m; medaljEl.textContent = MEDALJ_EMOJI[m]; }
+    $("r-rubrik").textContent = m ? MEDALJ_NAMN[m] + "!" : "Done, but no medal";
+    $("r-poang").textContent = fmt(t) + " s";
+    const grans =
+      m === "guld" ? `The gold limit was ${b.guld} s.` :
+      m === "silver" ? `${fmt(t - b.guld)} s from gold.` :
+      m === "brons" ? `${fmt(t - b.silver)} s from silver.` :
+      `The bronze limit was ${b.brons} s.`;
+    $("r-text").textContent = grans;
+    if (!ovning) {
+      const forra = lasBasta();
+      if (forra == null || t < forra) {
+        sparaBasta(t);
+        if (forra != null) $("r-rekord").textContent = "New personal best!";
+      } else {
+        $("r-rekord").textContent = `Your best time: ${fmt(forra)} s`;
+      }
+      const f = forstaVinst();
+      if (!f) {
+        spara(forstaNyckel, { varde: Math.round(t * 10) / 10, medalj: m || "", text: fmt(t) + " s", skickad: false });
+        if (!R || !R.arInkopplad()) $("r-skickat").textContent = "";
+        else if (!R.kod()) $("r-skickat").textContent = "Enter your code below and your result goes to the scoreboard.";
+        else if (tavlaStatus && tavlaStatus.harSpelat) $("r-skickat").textContent = "You already have a result on today’s scoreboard.";
+      } else {
+        $("r-skickat").textContent = "Only your first finished attempt counts on the scoreboard.";
+      }
+      forsokSkicka();
+    }
+  } else {
+    medaljEl.hidden = true;
+    $("r-rubrik").textContent = "Boom!";
+    const andel = Math.floor(100 * spel.oppnade / (b.W * b.H - b.antal));
+    $("r-poang").textContent = andel + "%";
+    $("r-text").textContent = "of the board opened. It can always be solved without guessing.";
+    if (!ovning) {
+      const forra = lasBasta();
+      if (forra != null) $("r-rekord").textContent = `Your best time: ${fmt(forra)} s`;
+    }
+  }
+  placeraTavla(ovning ? null : "r-tavlaplats");
+  // Mästarprovet i lucka 24: tiden i sekunder som på tavlan, en sprängd mina är en missad runda.
+  if (ovning && PROV) Advent.Prov.runda(vann ? Math.round(t * 10) / 10 : 1e9, vann ? fmt(t) + " s" : "mina");
+  uppdateraTavlaKnappar();
+  window.scrollTo(0, 0);
+}
+
+// ===== Inmatning =====
+const ram = $("ram");
+let tryckInfo = null;
+// Kortare än KORT_TRYCK = gräv. Mellan KORT_TRYCK och LANGT_TRYCK = ingenting (ångrat).
+const KORT_TRYCK = 200;
+const LANGT_TRYCK = 280;
+
+// Spelet sköter själv att flytta banan. Då kan webbläsarens egna gester (meny vid
+// långt tryck, markering, förstoringsglas) stängas av helt på spelplanen.
+ram.addEventListener("contextmenu", e => e.preventDefault());
+ram.addEventListener("selectstart", e => e.preventDefault());
+ram.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+let glid = null;
+
+ram.addEventListener("pointerdown", e => {
+  if (!e.isPrimary) return;
+  cancelAnimationFrame(glid);
+  const c = e.target.closest(".c");
+  tryckInfo = {
+    t0: performance.now(), id: e.pointerId, x: e.clientX, y: e.clientY, sl: ram.scrollLeft, st: ram.scrollTop,
+    cell: c ? +c.dataset.i : null, flyttad: false, lang: false, mus: e.pointerType === "mouse",
+    knapp: e.button,
+  };
+  if (tryckInfo.mus && e.button === 2) { if (c) tryck(+c.dataset.i, true); tryckInfo = null; return; }
+  if (c && spel && !spel.oppen[+c.dataset.i]) {
+    c.classList.add("trycks");
+    tryckInfo.el = c;
+    tryckInfo.timer = setTimeout(() => {
+      if (tryckInfo && !tryckInfo.flyttad) {
+        tryckInfo.lang = true;
+        c.classList.remove("trycks");
+        tryck(tryckInfo.cell, true);
+        sparrCell = tryckInfo.cell; sparrTill = performance.now() + SPARR_TID;
+      }
+    }, LANGT_TRYCK);
+  }
+});
+function slappVisning(t) {
+  clearTimeout(t.timer);
+  if (t.el) t.el.classList.remove("trycks");
+}
+ram.addEventListener("pointermove", e => {
+  if (!tryckInfo || e.pointerId !== tryckInfo.id) return;
+  const dx = e.clientX - tryckInfo.x, dy = e.clientY - tryckInfo.y;
+  if (!tryckInfo.flyttad && Math.hypot(dx, dy) > 8) {
+    tryckInfo.flyttad = true; slappVisning(tryckInfo);
+    ram.classList.add("drar");
+  }
+  // Dra för att flytta, och kom ihåg farten så att banan kan glida vidare
+  if (tryckInfo.flyttad) {
+    const nu = performance.now(), dt = Math.max(1, nu - (tryckInfo.tSen || nu - 16));
+    tryckInfo.vx = (e.clientX - (tryckInfo.xSen ?? tryckInfo.x)) / dt;
+    tryckInfo.vy = (e.clientY - (tryckInfo.ySen ?? tryckInfo.y)) / dt;
+    tryckInfo.xSen = e.clientX; tryckInfo.ySen = e.clientY; tryckInfo.tSen = nu;
+    ram.scrollLeft = tryckInfo.sl - dx; ram.scrollTop = tryckInfo.st - dy;
+  }
+});
+function glidVidare(vx, vy) {
+  cancelAnimationFrame(glid);
+  let senast = performance.now();
+  const steg = nu => {
+    const dt = nu - senast; senast = nu;
+    ram.scrollLeft -= vx * dt; ram.scrollTop -= vy * dt;
+    const f = Math.pow(0.995, dt); vx *= f; vy *= f;
+    if (Math.hypot(vx, vy) > 0.02) glid = requestAnimationFrame(steg);
+  };
+  glid = requestAnimationFrame(steg);
+}
+function slappt(e) {
+  if (!tryckInfo || e.pointerId !== tryckInfo.id) return;
+  slappVisning(tryckInfo);
+  ram.classList.remove("drar");
+  const t = tryckInfo; tryckInfo = null;
+  if (e.type === "pointercancel") return;
+  if (t.flyttad && !t.mus && t.tSen && performance.now() - t.tSen < 80) glidVidare(t.vx || 0, t.vy || 0);
+  // Spärren räknas från när fingret släpps, hur länge man än höll inne
+  if (t.lang) { sparrCell = t.cell; sparrTill = performance.now() + SPARR_TID; }
+  if (t.flyttad || t.lang || t.cell == null) return;
+  // Ett påbörjat långt tryck som släpps för tidigt gräver inte
+  if (spel && !spel.oppen[t.cell] && !spel.flagg[t.cell] && performance.now() - t.t0 > KORT_TRYCK) return;
+  tryck(t.cell, false);
+}
+ram.addEventListener("pointerup", slappt);
+ram.addEventListener("pointercancel", slappt);
+
+function zooma(steg) {
+  const ny = Math.max(0, Math.min(zoomSteg.length - 1, zoomNiva + steg));
+  if (ny === zoomNiva) return;
+  // Behåll mittpunkten
+  const mx = (ram.scrollLeft + ram.clientWidth / 2) / ram.scrollWidth;
+  const my = (ram.scrollTop + ram.clientHeight / 2) / ram.scrollHeight;
+  zoomNiva = ny; satStorlek();
+  ram.scrollLeft = mx * ram.scrollWidth - ram.clientWidth / 2;
+  ram.scrollTop = my * ram.scrollHeight - ram.clientHeight / 2;
+}
+$("zoom-in").onclick = () => zooma(1);
+$("zoom-ut").onclick = () => zooma(-1);
+window.addEventListener("resize", () => {
+  if (!spel) return;
+  const nu = cellStorlek; raknaZoomSteg();
+  const k = zoomSteg.findIndex(s => s >= nu);
+  zoomNiva = k < 0 ? zoomSteg.length - 1 : k; satStorlek();
+});
+
+$("avbryt").onclick = () => { clearInterval(timer); if (spel) spel.slut = true; visaIntro(); };
+$("startknapp").onclick = () => startaSpel(dagens, false);
+const ovningsBana = () => skapaBana("ovning-" + Date.now() + "-" + Math.random());
+$("ovningsknapp").onclick = () => startaSpel(ovningsBana(), true);
+$("r-igen").onclick = () => startaSpel(dagens, false);
+$("r-ovning").onclick = () => startaSpel(ovningsBana(), true);
+$("r-tillbaka").onclick = visaIntro;
+$("i-gavupp").onclick = geUpp;
+$("r-gavupp").onclick = geUpp;
+
+// Klockan står still medan man är borta från sidan, och brädet döljs (js/gemensam.js).
+// Ett påbörjat försök sparas inte, så pausen behöver inte heller sparas.
+Advent.pausKlocka({
+  gar: () => !!(spel && spel.startTid && !spel.slut),
+  flytta: ms => { spel.startTid += ms; },
+  nyckel: () => null
+});
+
+if (PROV) {
+  // Mästarprovet: dagens bana direkt, i övningsläge. Spela igen startar samma bana.
+  ["r-tillbaka", "r-ovning", "avbryt"].forEach(id => { $(id).hidden = true; $(id).style.display = "none"; });
+  $("r-igen").textContent = "Play again";
+  $("r-igen").onclick = () => startaSpel(dagens, true);
+  startaSpel(dagens, true);
+} else visaIntro();
+</script>
+</body>
+</html>

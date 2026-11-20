@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Globle</title>
+<meta name="theme-color" content="#14233F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../css/gemensam.css?v=7">
+<style>
+  h1 { margin: 4px 0 2px; font-size: 30px; line-height: 1.1; }
+  .under { margin: 0 0 16px; color: var(--accent); font-size: 14px; }
+
+  .jord { text-align: center; font-size: 72px; line-height: 1; margin: 8px 0 4px; }
+  .intro { margin: 0; text-align: center; line-height: 1.4; }
+
+  .knappar { display: grid; gap: 12px; margin: 16px 0; }
+
+  .regler h2 { margin: 0 0 6px; font-size: 18px; }
+  .regler ol { margin: 0; padding-left: 22px; line-height: 1.45; }
+  .regler b { font-weight: 600; }
+  .liten { font-size: 14px; color: var(--himmel-dampad); text-align: center; margin: 10px 0 0; }
+
+  .skicka { display: grid; gap: 10px; margin-bottom: 16px; }
+  .skicka h2 { margin: 0; font-size: 18px; }
+  .skicka label { font-weight: 600; }
+  .skicka textarea { font: inherit; font-size: 14px; color: var(--text); border: 2px solid var(--kant); border-radius: 14px; padding: 10px; background: var(--kort); resize: vertical; min-height: 110px; }
+  .skicka .last { margin: 0; font-size: 14px; color: var(--dampad); }
+  .skicka .last b { color: var(--text); }
+  .skicka .fel { margin: 0; font-size: 14px; color: var(--fel, #A23B2A); }
+  .skicka .fel:empty, .skicka .last:empty { display: none; }
+  .tavla { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<main class="spalt">
+  <a class="tillbaka" href="../../">← Calendar</a>
+  <h1>Globle</h1>
+  <p class="under" id="under"></p>
+
+  <div class="kort">
+    <div class="jord" aria-hidden="true">🌍</div>
+    <p class="intro">Find today’s secret country on the globe. The warmer the color, the closer you are. Fewest guesses wins.</p>
+  </div>
+
+  <div class="knappar">
+    <a class="knapp" id="spela" href="https://globle-game.com/" target="_blank" rel="noopener">Play</a>
+  </div>
+
+  <div class="skicka kort" id="skicka" hidden>
+    <h2>Your result</h2>
+    <label for="inklistrat">Paste the text from Share</label>
+    <textarea id="inklistrat" placeholder="🌎 Dec 5, 2026 🌍&#10;🔥 1 | Avg. Guesses: 7&#10;🟧🟨⬜⬜🟧🟥🟩 = 7"></textarea>
+    <p class="last" id="last"></p>
+    <p class="fel" id="skickafel"></p>
+    <button class="knapp" id="skickaknapp" type="button" disabled>Send to the group</button>
+    <button class="knapp diskret" id="gavupp" type="button">I give up, show the results</button>
+    <p class="liten">Only your first result counts.</p>
+  </div>
+
+  <section id="tavla"></section>
+
+  <details class="regler kort">
+    <summary><h2>How to play</h2></summary>
+    <ol>
+      <li>Tap <b>Play</b>. Globle opens (no account needed). Everyone gets the same country today.</li>
+      <li>Type in a country. It’s colored by how close it is to the secret country: yellow is far away, dark red is very close.</li>
+      <li>When you’ve found the country, tap <b>Share</b>, come back here and paste the text.</li>
+    </ol>
+    <p class="liten">Medals: gold for 1 to 5 guesses, silver for 6 to 10, bronze for 11 to 15.</p>
+  </details>
+
+  <div class="knappar">
+    <a class="knapp diskret" href="https://globle-game.com/practice" target="_blank" rel="noopener">Practice</a>
+  </div>
+</main>
+
+<script src="../../js/gemensam.js?v=6"></script>
+<script src="../../js/luckor.js?v=27"></script>
+<script src="../../js/resultat.js?v=4"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var dag = Advent.hamtaDag() || 5;
+  Advent.markeraOppnad(dag);
+  $('under').textContent = 'Day ' + dag;
+
+  var MANADER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function medalj(gissningar) {
+    if (gissningar <= 5) return 'guld';
+    if (gissningar <= 10) return 'silver';
+    if (gissningar <= 15) return 'brons';
+    return '';
+  }
+
+  // Plockar ut antal gissningar ur Globles delningstext:
+  // "🌎 Oct 26, 2026 🌍\n🔥 1 | Avg. Guesses: 7\n🟧🟨⬜⬜🟧🟥🟩 = 7"
+  // Globle byter land vid midnatt, så texten ska vara från i dag.
+  function lasDelning(text) {
+    var antal = text.match(/=\s*(\d+)\s*$/m);
+    if (!antal) return { fel: 'Can’t find the number of guesses. Paste the whole text from Share.' };
+    var datum = text.match(/([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})/);
+    if (datum) {
+      var idag = new Date();
+      if (MANADER.indexOf(datum[1]) !== idag.getMonth() || +datum[2] !== idag.getDate() || +datum[3] !== idag.getFullYear()) {
+        return { fel: 'That text is from ' + datum[1] + ' ' + datum[2] + ', not today. Play today’s country first.' };
+      }
+    }
+    var g = parseInt(antal[1], 10);
+    if (g < 1) return { fel: 'Can’t find the number of guesses. Paste the whole text from Share.' };
+    return { gissningar: g, text: g === 1 ? '1 guess' : g + ' guesses' };
+  }
+
+  var lastResultat = null;
+  Advent.Resultat.tavla($('tavla'), dag, {
+    vidStatus: function (d) { $('skicka').hidden = !d || d.harSpelat; }
+  });
+
+  $('inklistrat').addEventListener('input', function () {
+    var t = $('inklistrat').value.trim();
+    $('skickafel').textContent = '';
+    $('last').textContent = '';
+    lastResultat = null;
+    if (t) {
+      var r = lasDelning(t);
+      if (r.fel) $('skickafel').textContent = r.fel;
+      else {
+        lastResultat = r;
+        $('last').textContent = 'We read: ';
+        $('last').appendChild(document.createElement('b')).textContent = r.text;
+      }
+    }
+    $('skickaknapp').disabled = !lastResultat;
+  });
+
+  function skicka(resultat) {
+    $('skickaknapp').disabled = true;
+    $('gavupp').disabled = true;
+    $('skickafel').textContent = '';
+    Advent.Resultat.skicka(resultat).then(function () {
+      $('tavla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, function (fel) {
+      $('skickafel').textContent = fel.message;
+      $('skickaknapp').disabled = !lastResultat;
+      $('gavupp').disabled = false;
+    });
+  }
+  $('skickaknapp').addEventListener('click', function () {
+    if (!lastResultat) return;
+    skicka({
+      dag: dag, spel: 'globle', status: 'klar',
+      medalj: medalj(lastResultat.gissningar),
+      varde: lastResultat.gissningar,
+      text: lastResultat.text
+    });
+  });
+  $('gavupp').addEventListener('click', function () {
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
+      .then(function (ok) {
+        if (!ok) return;
+        skicka({ dag: dag, spel: 'globle', status: 'gav upp', medalj: '', text: '' });
+      });
+  });
+})();
+</script>
+</body>
+</html>

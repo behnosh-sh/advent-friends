@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wikitrivia</title>
+<meta name="theme-color" content="#14233F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../css/gemensam.css?v=7">
+<style>
+  h1 { margin: 4px 0 2px; font-size: 30px; line-height: 1.1; }
+  .under { margin: 0 0 16px; color: var(--accent); font-size: 14px; }
+
+  .jord { text-align: center; font-size: 72px; line-height: 1; margin: 8px 0 4px; }
+  .intro { margin: 0; text-align: center; line-height: 1.4; }
+
+  .knappar { display: grid; gap: 12px; margin: 16px 0; }
+
+  .regler h2 { margin: 0 0 6px; font-size: 18px; }
+  .regler ol { margin: 0; padding-left: 22px; line-height: 1.45; }
+  .regler b { font-weight: 600; }
+  .liten { font-size: 14px; color: var(--himmel-dampad); text-align: center; margin: 10px 0 0; }
+
+  .skicka { display: grid; gap: 10px; margin-bottom: 16px; }
+  .skicka h2 { margin: 0; font-size: 18px; }
+  .skicka label { font-weight: 600; }
+  .skicka textarea { font: inherit; font-size: 14px; color: var(--text); border: 2px solid var(--kant); border-radius: 14px; padding: 10px; background: var(--kort); resize: vertical; min-height: 110px; }
+  .skicka .last { margin: 0; font-size: 14px; color: var(--dampad); }
+  .skicka .last b { color: var(--text); }
+  .skicka .fel { margin: 0; font-size: 14px; color: var(--fel, #A23B2A); }
+  .skicka .fel:empty, .skicka .last:empty { display: none; }
+  .tavla { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<main class="spalt">
+  <a class="tillbaka" href="../../">← Calendar</a>
+  <h1>Wikitrivia</h1>
+  <p class="under" id="under"></p>
+
+  <div class="kort">
+    <div class="jord" aria-hidden="true">🗓️</div>
+    <p class="intro">Put inventions, events and famous people in the right order on the timeline. Three mistakes and it’s over. How many cards can you place correctly?</p>
+  </div>
+
+  <div class="knappar">
+    <a class="knapp" id="spela" href="https://wikitrivia.tomjwatson.com/daily" target="_blank" rel="noopener">Play</a>
+  </div>
+
+  <div class="skicka kort" id="skicka" hidden>
+    <h2>Your result</h2>
+    <label for="inklistrat">Paste the text from Share</label>
+    <textarea id="inklistrat" placeholder="#wikitrivia / Daily for Dec 11 2026&#10;&#10;🟩🟩🟩🟩🟥🟩🟥🟩🟩🟩🟩🟩🟥&#10;&#10;Score / 9 / Bronze"></textarea>
+    <p class="last" id="last"></p>
+    <p class="fel" id="skickafel"></p>
+    <button class="knapp" id="skickaknapp" type="button" disabled>Send to the group</button>
+    <button class="knapp diskret" id="gavupp" type="button">I give up, show the results</button>
+    <p class="liten">Only your first result counts.</p>
+  </div>
+
+  <section id="tavla"></section>
+
+  <details class="regler kort">
+    <summary><h2>How to play</h2></summary>
+    <ol>
+      <li>Tap <b>Play</b>. Today’s Wikitrivia opens (no account needed). Everyone gets the same cards today.</li>
+      <li>Drag each new card to the right spot on the timeline. A wrong spot costs one of your three lives.</li>
+      <li>When the game is over, tap <b>Share</b>, come back here and paste the text.</li>
+    </ol>
+    <p class="liten">Most cards placed correctly wins; a tie means a shared place.<br>Medals: gold for at least 20, silver for at least 12, bronze for at least 6.<br>Wikitrivia switches to new cards at midnight UTC.</p>
+  </details>
+</main>
+
+<script src="../../js/gemensam.js?v=6"></script>
+<script src="../../js/luckor.js?v=27"></script>
+<script src="../../js/resultat.js?v=4"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var dag = Advent.hamtaDag() || 11;
+  Advent.markeraOppnad(dag);
+  $('under').textContent = 'Day ' + dag;
+
+  var MANADER = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function medalj(poang) {
+    if (poang >= 20) return 'guld';
+    if (poang >= 12) return 'silver';
+    if (poang >= 6) return 'brons';
+    return '';
+  }
+
+  // Plockar ut poängen ur Wikitrivias delningstext:
+  // "#wikitrivia / Daily for Oct 27 2026\n\n🟩🟩🟥…\n\nScore / 9 / Bronze\n\nhttps://wikitrivia.tomjwatson.com/daily"
+  // Det dagliga spelet byter vid UTC-midnatt och datumet i texten är UTC-datumet, så det jämförs med UTC.
+  // Från iPhone kan texten komma URL-kodad, så den avkodas först.
+  function lasDelning(text) {
+    if (/%[0-9A-F]{2}/i.test(text)) {
+      try { text = decodeURIComponent(text.replace(/\+/g, ' ')); } catch (e) { /* inte URL-kodad ändå */ }
+    }
+    if (!/Daily for/i.test(text)) return { fel: 'This doesn’t look like today’s Wikitrivia. Play with the Play button and paste the text from Share.' };
+    var poang = text.match(/Score\s*\/\s*(\d+)/i);
+    if (!poang) return { fel: 'Can’t find a score. Paste the whole text from Share.' };
+    var datum = text.match(/Daily for\s+([A-Z][a-z]{2})\s+(\d{1,2}),?\s+(\d{4})/i);
+    if (datum) {
+      var idag = new Date();
+      if (MANADER.indexOf(datum[1]) !== idag.getUTCMonth() || +datum[2] !== idag.getUTCDate() || +datum[3] !== idag.getUTCFullYear()) {
+        return { fel: 'That text is from ' + datum[1] + ' ' + datum[2] + ', not today. Play today’s Wikitrivia first.' };
+      }
+    }
+    var p = parseInt(poang[1], 10);
+    return { poang: p, text: p + (p === 1 ? ' card right' : ' cards right') };
+  }
+
+  var lastResultat = null;
+  Advent.Resultat.tavla($('tavla'), dag, {
+    vidStatus: function (d) { $('skicka').hidden = !d || d.harSpelat; }
+  });
+
+  $('inklistrat').addEventListener('input', function () {
+    var t = $('inklistrat').value.trim();
+    $('skickafel').textContent = '';
+    $('last').textContent = '';
+    lastResultat = null;
+    if (t) {
+      var r = lasDelning(t);
+      if (r.fel) $('skickafel').textContent = r.fel;
+      else {
+        lastResultat = r;
+        $('last').textContent = 'We read: ';
+        $('last').appendChild(document.createElement('b')).textContent = r.text;
+      }
+    }
+    $('skickaknapp').disabled = !lastResultat;
+  });
+
+  function skicka(resultat) {
+    $('skickaknapp').disabled = true;
+    $('gavupp').disabled = true;
+    $('skickafel').textContent = '';
+    Advent.Resultat.skicka(resultat).then(function () {
+      $('tavla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, function (fel) {
+      $('skickafel').textContent = fel.message;
+      $('skickaknapp').disabled = !lastResultat;
+      $('gavupp').disabled = false;
+    });
+  }
+  $('skickaknapp').addEventListener('click', function () {
+    if (!lastResultat) return;
+    // Högst vinner (lagreArBattre: false i luckor.js).
+    skicka({
+      dag: dag, spel: 'wikitrivia', status: 'klar',
+      medalj: medalj(lastResultat.poang),
+      varde: lastResultat.poang,
+      text: lastResultat.text
+    });
+  });
+  $('gavupp').addEventListener('click', function () {
+    Advent.fraga({ rubrik: 'Give up?', text: 'Then you can’t send a result for this day.', ja: 'Give up', nej: 'Cancel' })
+      .then(function (ok) {
+        if (!ok) return;
+        skicka({ dag: dag, spel: 'wikitrivia', status: 'gav upp', medalj: '', text: '' });
+      });
+  });
+})();
+</script>
+</body>
+</html>
