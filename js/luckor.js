@@ -25,7 +25,8 @@ window.LUCKOR = {
   20: { titel: 'Sense of Time', sokvag: 'spel/tidskanslan/' },
   21: { titel: 'Wordle', sokvag: 'spel/wordle/' },
   22: { titel: 'Simon Says', sokvag: 'spel/simon/', lagreArBattre: false },
-  23: { titel: 'Flying Santa', sokvag: 'spel/flygande-tomten/', lagreArBattre: false }
+  23: { titel: 'Flying Santa', sokvag: 'spel/flygande-tomten/', lagreArBattre: false },
+  24: { titel: 'A letter for you', sokvag: 'spel/lucka24/' }
 };
 
 // Datumlåset gäller (true öppnar alla luckor).
