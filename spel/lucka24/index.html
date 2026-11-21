@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Day 24</title>
+<meta name="theme-color" content="#14233F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap">
+<link rel="stylesheet" href="../../css/gemensam.css?v=7">
+<style>
+  /* Lucka 24: kuvert från the Calendar Elf → Mästarprovet → kort från Behnosh → The 2026 Advent standings. */
+  .scen { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 0 32px; text-align: center; }
+  .scen > * { animation: upp .35s ease-out; }
+  .rubrik24 { margin: 4px 0 0; font-size: 30px; line-height: 1.1; }
+  .kuvert {
+    position: relative; width: min(78vw, 300px); aspect-ratio: 3 / 2; border: 0; padding: 0; border-radius: 10px;
+    background: linear-gradient(#F3E7CF, #E2D1B0); box-shadow: 0 8px 0 rgba(0,0,0,.3); cursor: pointer;
+    animation: gunga 3s ease-in-out infinite; -webkit-tap-highlight-color: transparent;
+  }
+  .kuvert::before {
+    content: ""; position: absolute; inset: 0 0 35% 0; background: linear-gradient(#E9DBBE, #D8C49E);
+    clip-path: polygon(0 0, 100% 0, 50% 100%); border-radius: 10px 10px 0 0;
+  }
+  .kuvert .adress { position: absolute; left: 0; right: 0; bottom: 10px; color: #3B2E25; font: 700 24px/1 Caveat, "Segoe Print", cursive; }
+  .sigill {
+    position: absolute; left: 50%; top: 58%; width: 50px; height: 50px; transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #D9504F, #9A1F27 70%); box-shadow: 0 2px 0 rgba(0,0,0,.25);
+    display: grid; place-items: center; font-size: 22px;
+  }
+  .sigill.guld { background: radial-gradient(circle at 40% 35%, #FFE08A, #C99A1E 70%); }
+  .kuvert.glider { animation: glidIn .8s ease-out, gunga 3s ease-in-out .8s infinite; }
+  .tryck { margin: 0; color: var(--himmel-dampad); font-size: 14px; }
+  .brev {
+    width: 100%; max-width: 380px; padding: 24px 22px; border-radius: 14px; background: #FBF4EA; color: #3B2E25; text-align: left;
+    box-shadow: 0 6px 0 rgba(0,0,0,.3); font: 500 24px/1.3 Caveat, "Segoe Print", cursive;
+  }
+  .brev p { margin: 0 0 14px; }
+  .brev .underskrift { text-align: right; }
+  .brev .knapp { font-family: var(--text-typsnitt); }
+  .prov { width: 100%; max-width: 380px; border-radius: 16px; background: #FBF6EC; color: #3A3127; padding: 22px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .prov p { margin: 0; line-height: 1.45; }
+  .prov .inledning { font-size: 16px; }
+  .prov .skill { font-style: italic; color: #6B5A4E; }
+  .prov .mal { font: 700 24px/1.25 var(--rubrik-typsnitt); }
+  .prov .knapp { width: auto; }
+  .replik { max-width: 380px; margin: 0; font-size: 18px; line-height: 1.45; }
+  .provspel { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: var(--himmel); animation: upp .3s ease-out; }
+  .provspel .topp { display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); background: #0E1830; color: var(--himmel-text); }
+  .provspel .topp .mal { flex: 1; margin: 0; font: 700 18px/1.2 var(--rubrik-typsnitt); }
+  .provspel .stang { flex: none; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: transparent; color: var(--himmel-text); font-size: 18px; cursor: pointer; }
+  .provspel .hjalp { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px; background: #FBF6EC; color: #3A3127; text-align: center; }
+  .provspel .hjalp p { margin: 0; font-size: 15px; line-height: 1.4; }
+  .provspel .hjalp .rad { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .provspel .hjalp .knapp { width: auto; margin: 0; padding: 8px 14px; font-size: 15px; }
+  .provspel .hjalp .knapp.ljus { color: #6B5A4E; border-color: rgba(59,46,37,.35); }
+  .provspel iframe { flex: 1; width: 100%; border: 0; background: var(--himmel); }
+
+  /* Kortet från Behnosh */
+  .kortet { position: relative; width: 100%; max-width: 380px; background: #FBF6EC; color: #2B2B2B; border-radius: 14px; padding: 18px 20px 22px; box-shadow: 0 10px 30px rgba(0,0,0,.4); text-align: left; animation: kortUpp .7s ease-out; }
+  .kortet svg { display: block; margin: 0 auto; width: 200px; overflow: visible; }
+  .kortet .hh { font: 700 36px/1.1 Caveat, cursive; text-align: center; color: #B3262E; margin: 2px 0 6px; }
+  .kortet p { font: 500 23px/1.25 Caveat, "Segoe Print", cursive; margin: 8px 0; }
+  .kortet .sign { text-align: right; font-size: 30px; font-weight: 700; }
+  .arm { transform-origin: 128px 160px; animation: vinka .7s ease-in-out .6s 3; }
+  .tofs { transform-origin: 104px 52px; animation: tofs 2.4s ease-in-out .4s 2; }
+  .sno { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .sno i { position: absolute; top: -10px; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.55); animation: falla linear infinite; }
+  main.spalt { position: relative; z-index: 1; }
+  .knapp-rad { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 380px; }
+  .lanklik { background: none; border: 0; color: var(--himmel-dampad); text-decoration: underline; font: inherit; font-size: 14px; cursor: pointer; }
+  .stallning-ruta { width: 100%; max-width: 420px; text-align: left; }
+  .stallning-ruta h2 { margin: 0 0 14px; font-size: 24px; text-align: center; }
+
+  @keyframes upp { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes gunga { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-6deg); } 70% { transform: rotate(5deg); } }
+  @keyframes glidIn { from { transform: translateY(60px) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes kortUpp { from { transform: translateY(40px) rotate(3deg) scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes vinka { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-28deg); } }
+  @keyframes tofs { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(8deg); } 75% { transform: rotate(-6deg); } }
+  @keyframes falla { to { transform: translateY(110vh); } }
+  @media (prefers-reduced-motion: reduce) {
+    .kuvert, .kuvert.glider, .arm, .tofs, .kortet, .scen > * { animation: none; }
+    .sno { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="sno" id="sno" aria-hidden="true"></div>
+<main class="spalt">
+  <a class="tillbaka" href="../../">← Calendar</a>
+  <h1 class="rubrik24">Day 24</h1>
+  <div class="scen" id="scen"><p class="tryck" id="status">Loading…</p></div>
+  <div id="kodruta" hidden></div>
+</main>
+
+<script src="../../js/gemensam.js?v=6"></script>
+<script src="../../js/luckor.js?v=28"></script>
+<script src="../../js/resultat.js?v=4"></script>
+<script src="../../js/stallning.js?v=1"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var scen = $('scen');
+  function el(tagg, klass, text) {
+    var e = document.createElement(tagg);
+    if (klass) e.className = klass;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function knapp(text, klass) { var b = el('button', 'knapp' + (klass ? ' ' + klass : ''), text); b.type = 'button'; return b; }
+  function tom() { scen.textContent = ''; window.scrollTo(0, 0); }
+
+  // ===== Mästarprovet =====
+  // Spelen som kan bli mästarprov, efter dag. varde jämförs som i spelets egen tavla (samma som familjens lucka 24).
+  // kort(varde) = målet kort för spelets mätare, malText(varde) = målet i ord, sank(varde) = 40 % lättare, nar(varde, mal) = räcker rundan.
+  function tid10(v) { return Math.floor(v / 600) + ':' + ('0' + Math.floor(v / 10) % 60).slice(-2) + '.' + (v % 10); }
+  var PROV_SPEL = {
+    1: {
+      namn: 'Snake', sokvag: '../snake/',
+      kort: function (v) { return String(Math.floor(v / 10000)); },
+      malText: function (v) { return 'Snake. At least length ' + Math.floor(v / 10000) + '.'; },
+      sank: function (v) { return Math.max(4, Math.ceil(Math.floor(v / 10000) * 0.6)) * 10000; },
+      nar: function (v, mal) { return Math.floor(v / 10000) >= Math.floor(mal / 10000); },
+      skill: 'Quick turns, cool nerves and a snake that never gets enough.',
+      klart: 'The snake masters have spoken! Snake bows to you, {namn}, and the whole calendar cheers.',
+      reserv: 15 * 10000
+    },
+    17: {
+      namn: 'Memory', sokvag: '../memory/', langRunda: true,
+      kort: function (v) { return String(Math.floor(v / 100000)); },
+      malText: function (v) { return 'Memory. At most ' + Math.floor(v / 100000) + ' moves.'; },
+      sank: function (v) { return Math.floor(Math.floor(v / 100000) * 1.4) * 100000 + 99999; },
+      nar: function (v, mal) { return Math.floor(v / 100000) <= Math.floor(mal / 100000); },
+      skill: 'A memory like an elephant, and a Grinch shuffling the cards.',
+      klart: 'Card after card, and you remembered every one. I could use a memory like yours, {namn}.',
+      reserv: 30 * 100000 + 99999
+    },
+    8: {
+      namn: 'Perfect Circle', sokvag: '../perfekt-cirkel/',
+      kort: function (v) { return (v / 10).toFixed(1) + '%'; },
+      malText: function (v) { return 'Perfect Circle. At least ' + (v / 10).toFixed(1) + '%.'; },
+      sank: function (v) { return Math.round(v * 0.6); },
+      nar: function (v, mal) { return v >= mal; },
+      skill: 'A steady hand and an eye for round things.',
+      klart: 'A circle so round the moon got jealous. The Elf measured it three times, {namn}, and found no flaw.',
+      reserv: 700
+    },
+    15: {
+      // värdet är poäng + 1000, poängen kan vara negativ
+      namn: 'Snowflake Catcher', sokvag: '../snoflingor/',
+      kort: function (v) { var p = v - 1000; return p < 0 ? '−' + (-p) : String(p); },
+      malText: function (v) { var p = v - 1000; return 'Snowflake Catcher. At least ' + (p < 0 ? '−' + (-p) : p) + ' points.'; },
+      sank: function (v) { var p = v - 1000; return Math.floor(p - Math.abs(p) * 0.4) + 1000; },
+      nar: function (v, mal) { return v >= mal; },
+      skill: 'A fast sled and sharp eyes in the falling snow.',
+      klart: 'Not one snowflake escaped you! Winter itself has given up, {namn}.',
+      reserv: 1020
+    },
+    22: {
+      namn: 'Simon Says', sokvag: '../simon/',
+      kort: function (v) { return String(Math.floor(v / 10000)); },
+      malText: function (v) { return 'Simon Says. At least length ' + Math.floor(v / 10000) + '.'; },
+      sank: function (v) { return Math.max(2, Math.ceil(Math.floor(v / 10000) * 0.6)) * 10000; },
+      nar: function (v, mal) { return Math.floor(v / 10000) >= Math.floor(mal / 10000); },
+      skill: 'The lights glow, and you remember. Every time, in the right order.',
+      klart: 'The lights glowed and you forgot nothing. Your memory is sharper than fresh frost, {namn}.',
+      reserv: 6 * 10000
+    },
+    23: {
+      namn: 'Flying Santa', sokvag: '../flygande-tomten/',
+      kort: function (v) { return String(Math.floor(v / 1000)); },
+      malText: function (v) { var n = Math.floor(v / 1000); return 'Flying Santa. At least ' + n + (n === 1 ? ' chimney.' : ' chimneys.'); },
+      sank: function (v) { return Math.max(1, Math.ceil(Math.floor(v / 1000) * 0.6)) * 1000; },
+      nar: function (v, mal) { return Math.floor(v / 1000) >= Math.floor(mal / 1000); },
+      skill: 'A steady hand on the reins, and no chimneys in the way.',
+      klart: 'The chimneys are still trembling. Nobody has flown Santa’s sleigh as boldly as you, {namn}. Hats off to you!',
+      reserv: 5 * 1000
+    },
+    14: {
+      // värdet är tiden i tiondelar × 10 000 + drag, tiden jämförs i hela sekunder som den visas
+      namn: '15 Puzzle', sokvag: '../femton/', langRunda: true,
+      sek: function (v) { return Math.round(Math.floor(v / 10000) / 10); },
+      kort: function (v) { return Advent.formateraTid(this.sek(v)); },
+      malText: function (v) { return '15 Puzzle. At most ' + Advent.formateraTid(this.sek(v)) + '.'; },
+      sank: function (v) { return Math.round(this.sek(v) * 1.4) * 10 * 10000 + 9999; },
+      nar: function (v, mal) { return this.sek(v) <= this.sek(mal); },
+      skill: 'Quick fingers, and a plan for every single tile.',
+      klart: 'The tiles slid into place as if by magic. The Elf has seen many puzzlers, {namn}, but none with fingers like yours.',
+      reserv: 300 * 10 * 10000 + 9999
+    },
+    12: {
+      // värdet är den sammanlagda tiden för de tre banorna i tiondelar
+      namn: 'The Maze', sokvag: '../labyrint/', langRunda: true,
+      kort: tid10,
+      malText: function (v) { return 'The Maze. At most ' + tid10(v) + '.'; },
+      sank: function (v) { return Math.round(v * 1.4); },
+      nar: function (v, mal) { return v <= mal; },
+      skill: 'A sure sense of direction, even when the dark closes in.',
+      klart: 'The corridors twisted and turned, but you found your way, {namn}. Not even Santa’s reindeer get out that fast.',
+      reserv: 900
+    },
+    10: {
+      // värdet är tiden i sekunder med en decimal, samma bana som den 10 december; en mina är en missad runda
+      namn: 'Minesweeper', sokvag: '../minesweeper/',
+      kort: function (v) { return v.toFixed(1); },
+      malText: function (v) { return 'Minesweeper. At most ' + v.toFixed(1) + ' s.'; },
+      sank: function (v) { return Math.round(v * 14) / 10; },
+      nar: function (v, mal) { return Math.round(v * 10) <= Math.round(mal * 10); },
+      skill: 'Cold logic, and a finger that never guesses.',
+      klart: 'Not a single mine went off! You read that board like an open book, {namn}.',
+      reserv: 120
+    }
+  };
+  var TEXT = {
+    vann: 'Hear ye, hear ye! On December {dag}, {namn} beat everyone at {spel}, with {resultat}. Now the Elf calls on the champion once more.',
+    bast: 'The Elf remembers December {dag}, when {namn} played {spel} like never before: {resultat}. Can you do it again?',
+    reserv: 'The Elf has picked a challenge for you, {namn}: {spel}. Show what you’ve got.',
+    sankMal: 'Even champions have bad days. Shall the Elf look the other way a little?',
+    hoppa: 'You fought bravely. Want to move on? The Elf has something for you anyway.',
+    sankt: 'You did it, {namn}! Even the greatest champions have off days, but you made it anyway.',
+    hoppat: 'You fought bravely, {namn}, and courage isn’t only measured in points.',
+    brevKommer: 'And look, a letter just arrived for you.'
+  };
+  var MEDALJ_VARDE = { guld: 3, silver: 2, brons: 1 };
+  // Sänk målet: efter 4 missade rundor eller 2 minuter. Hoppa över: efter 10 rundor eller 5 minuter.
+  var SANK_EFTER = 4, HOPPA_EFTER = 10, SANK_TID = 120000, HOPPA_TID = 300000;
+
+  // ===== Läget i telefonen =====
+  var s = null;
+  function nyckel() { return 'lucka24-' + (Advent.Resultat.namn() || ''); }
+  function spara() { Advent.spara(nyckel(), s); }
+  function namn() { return Advent.Resultat.namn() || ''; }
+  function fyll(mall, extra) {
+    var p = s.prov || {}, spel = PROV_SPEL[p.dag] || {};
+    return mall.replace(/\{namn\}/g, namn()).replace(/\{spel\}/g, spel.namn || '')
+      .replace(/\{dag\}/g, String(p.dag)).replace(/\{resultat\}/g, p.text || '');
+  }
+
+  // Hela året från arket (från julafton ser alla allt). Sparas i telefonen om arket inte svarar senare.
+  var arsSvar = null;
+  function hamtaAret() {
+    return Advent.Resultat.alla().then(function (svar) {
+      arsSvar = svar;
+      Advent.spara('lucka24-aret', svar);
+      return svar;
+    }, function (fel) {
+      var sparat = Advent.lasa('lucka24-aret', null);
+      if (sparat && sparat.dagar) { arsSvar = sparat; return sparat; }
+      throw fel;
+    });
+  }
+
+  // Ens eget bästa: först ett spel man vann (bäst medalj först), annars bästa placering. Flera får gärna samma spel.
+  function valjProv(svar, jag) {
+    var kand = [];
+    Object.keys(PROV_SPEL).map(Number).forEach(function (d) {
+      var dd = svar.dagar[d];
+      if (!dd || !dd.harSpelat) return;
+      Advent.Resultat.ordna(d, dd, svar.spelare).forEach(function (r) {
+        if (r.spelare !== jag || r.status !== 'klar') return;
+        kand.push({ dag: d, plats: r.plats, medalj: MEDALJ_VARDE[r.medalj] || 0, varde: r.varde, text: r.text });
+      });
+    });
+    kand.sort(function (a, b) { return (a.plats - b.plats) || (b.medalj - a.medalj) || (a.dag - b.dag); });
+    if (!kand.length) return { dag: 1, varde: PROV_SPEL[1].reserv, text: '', vann: null };
+    var k = kand[0];
+    return { dag: k.dag, varde: k.varde, text: k.text, vann: k.plats === 1 };
+  }
+
+  // ===== Stegen =====
+  function visaKuvert() {
+    tom();
+    var kuv = el('button', 'kuvert');
+    kuv.setAttribute('aria-label', 'Open the letter');
+    kuv.appendChild(el('span', 'sigill', '✉️'));
+    kuv.appendChild(el('span', 'adress', 'For ' + namn()));
+    kuv.addEventListener('click', function () { s.steg = 'brev'; spara(); visaBrev(); });
+    scen.appendChild(kuv);
+    scen.appendChild(el('p', 'tryck', 'Tap the envelope'));
+  }
+
+  function visaBrev() {
+    tom();
+    var brev = el('div', 'brev');
+    brev.appendChild(el('p', null, 'Dear ' + namn() + ','));
+    brev.appendChild(el('p', null, 'Twenty-three days ago I left a little calendar on your phone, and you opened every door I gave you (well, most of them). Today, on the very last day, I have one last challenge. Just for you, and only you can do it.'));
+    brev.appendChild(el('p', null, 'This time, your opponent is the toughest one yet: your own best result.'));
+    var under = el('p', 'underskrift', 'Yours truly,'); under.appendChild(el('br')); under.appendChild(document.createTextNode('The Calendar Elf')); brev.appendChild(under);
+    var b = knapp('Accept the challenge');
+    b.addEventListener('click', visaProv);
+    brev.appendChild(b);
+    scen.appendChild(brev);
+  }
+
+  function visaProv() {
+    tom();
+    var prov = el('div', 'prov');
+    prov.appendChild(el('p', 'tryck', 'The Elf is checking the spreadsheet…'));
+    scen.appendChild(prov);
+    var val = s.prov ? Promise.resolve(s.prov) : hamtaAret().then(function (svar) {
+      var t = valjProv(svar, namn());
+      s.prov = { dag: t.dag, varde: t.varde, text: t.text, vann: t.vann, mal: t.varde, forsok: 0, missar: 0, sankt: false, tid: 0 };
+      spara();
+      return s.prov;
+    });
+    val.then(function (p) {
+      var spel = PROV_SPEL[p.dag];
+      prov.textContent = '';
+      if (!p.forsok) {
+        prov.appendChild(el('p', 'inledning', fyll(p.vann === true ? TEXT.vann : p.vann === false ? TEXT.bast : TEXT.reserv)));
+        prov.appendChild(el('p', 'skill', spel.skill));
+      }
+      prov.appendChild(el('p', 'mal', spel.malText(p.mal)));
+      var start = knapp(p.forsok ? 'Continue' : 'Accept the challenge');
+      start.addEventListener('click', spelaProv);
+      prov.appendChild(start);
+    }, function (fel) {
+      prov.textContent = '';
+      prov.appendChild(el('p', null, fel.message));
+      var igen = knapp('Try again');
+      igen.addEventListener('click', visaProv);
+      prov.appendChild(igen);
+    });
+  }
+
+  // Spelet öppnas i en ram över hela skärmen. Varje färdig runda räknas som ett försök.
+  function spelaProv() {
+    var p = s.prov, spel = PROV_SPEL[p.dag];
+    var yta = el('div', 'provspel');
+    var topp = el('div', 'topp');
+    var mal = el('p', 'mal', spel.malText(p.mal));
+    var stang = el('button', 'stang', '✕');
+    stang.type = 'button';
+    stang.setAttribute('aria-label', 'Back');
+    topp.appendChild(mal);
+    topp.appendChild(stang);
+    var hjalp = el('div', 'hjalp');
+    hjalp.hidden = true;
+    var ram = el('iframe');
+    ram.title = spel.namn;
+    function adress() { return spel.sokvag + '?dag=' + p.dag + '&prov=1&mal=' + encodeURIComponent(spel.kort(p.mal)); }
+    ram.src = adress();
+    yta.appendChild(topp);
+    yta.appendChild(hjalp);
+    yta.appendChild(ram);
+    document.body.appendChild(yta);
+    document.body.style.overflow = 'hidden';
+
+    function stangSpel() {
+      clearInterval(klocka);
+      spara();
+      window.removeEventListener('message', tagEmot);
+      yta.remove();
+      document.body.style.overflow = '';
+    }
+    var ritat = null;
+    function ritaHjalp() {
+      var tid = p.tid || 0;
+      var sankLas = p.missar >= SANK_EFTER || tid >= SANK_TID;
+      var kanSanka = !p.sankt && sankLas, kanHoppa = p.forsok >= HOPPA_EFTER || tid >= HOPPA_TID;
+      var nu = (kanSanka ? 's' : '') + (kanHoppa ? 'h' : '') + (p.sankt ? 'x' : '');
+      if (nu === ritat && !hjalp.dataset.ny) return;
+      ritat = nu;
+      delete hjalp.dataset.ny;
+      hjalp.textContent = '';
+      hjalp.hidden = !sankLas && !kanHoppa;
+      if (hjalp.hidden) return;
+      var fraga = kanHoppa && !p.sagtHoppa ? 'hoppa' : kanSanka && !p.sagtSank ? 'sank' : null;
+      if (fraga) hjalp.appendChild(el('p', null, fraga === 'hoppa' ? TEXT.hoppa : TEXT.sankMal));
+      function sagt() {
+        if (fraga === 'hoppa') p.sagtHoppa = true;
+        if (fraga === 'sank') p.sagtSank = true;
+        hjalp.dataset.ny = '1';
+      }
+      var rad = el('div', 'rad');
+      var igen = knapp('Try again', 'ljus');
+      igen.addEventListener('click', function () { sagt(); spara(); ram.src = adress(); ritaHjalp(); });
+      rad.appendChild(igen);
+      if (kanSanka) {
+        var sank = knapp('Lower the goal');
+        sank.addEventListener('click', function () {
+          sagt();
+          p.sagtSank = true;
+          p.sankt = true;
+          p.mal = spel.sank(p.varde);
+          spara();
+          mal.textContent = spel.malText(p.mal);
+          ram.src = adress();
+          ritaHjalp();
+        });
+        rad.appendChild(sank);
+      }
+      if (kanHoppa) {
+        var hoppa = knapp('Skip', 'gul');
+        hoppa.addEventListener('click', function () { stangSpel(); provKlart('hoppat'); });
+        rad.appendChild(hoppa);
+      }
+      hjalp.appendChild(rad);
+    }
+    function tagEmot(e) {
+      if (e.origin !== location.origin || e.source !== ram.contentWindow) return;
+      var d = e.data;
+      if (!d || d.typ !== 'provRunda' || typeof d.varde !== 'number') return;
+      p.forsok++;
+      if (spel.nar(d.varde, p.mal)) {
+        spara();
+        setTimeout(function () { stangSpel(); provKlart(p.sankt ? 'sankt' : 'fullt'); }, 900);
+        return;
+      }
+      p.missar++;
+      spara();
+      ritaHjalp();
+    }
+    window.addEventListener('message', tagEmot);
+    stang.addEventListener('click', function () { stangSpel(); visaProv(); });
+    // Speltiden räknas bara medan provet är öppet och sidan syns.
+    var forra = Date.now();
+    var klocka = setInterval(function () {
+      var nu = Date.now();
+      if (!document.hidden) p.tid = (p.tid || 0) + Math.min(nu - forra, 5000);
+      forra = nu;
+      if (Math.floor(p.tid / 1000) % 5 === 0) spara();
+      if (spel.langRunda) ritaHjalp();
+    }, 1000);
+    ritaHjalp();
+  }
+
+  function provKlart(hur) {
+    s.prov.hur = hur;
+    s.steg = 'efter';
+    spara();
+    visaEfter();
+  }
+
+  // Alvens replik och kuvertet från Behnosh.
+  function visaEfter() {
+    tom();
+    var p = s.prov, spel = PROV_SPEL[p.dag];
+    var replik = p.hur === 'fullt' ? spel.klart : p.hur === 'sankt' ? TEXT.sankt : TEXT.hoppat;
+    scen.appendChild(el('p', 'replik', fyll(replik)));
+    scen.appendChild(el('p', 'replik', TEXT.brevKommer));
+    var kuv = el('button', 'kuvert glider');
+    kuv.setAttribute('aria-label', 'Open the letter from Behnosh');
+    kuv.appendChild(el('span', 'sigill guld', '⭐'));
+    kuv.appendChild(el('span', 'adress', 'From Behnosh'));
+    kuv.addEventListener('click', function () { s.steg = 'kort'; spara(); visaKort(); });
+    scen.appendChild(kuv);
+  }
+
+  // Kortet: ritad alv med Behnoshs ansikte fastklistrat, texten och knappen till tabellen.
+  var ALV = '<svg viewBox="0 0 200 262" role="img" aria-label="An elf with Behnosh’s face">' +
+    '<defs><clipPath id="ansikte"><ellipse cx="100" cy="100" rx="40" ry="49"/></clipPath></defs>' +
+    '<path d="M78 236 L74 254 L58 256 Q56 248 66 246 L70 234Z M122 236 L126 254 L142 256 Q144 248 134 246 L130 234Z" fill="#7A2E22"/>' +
+    '<path d="M60 238 L70 150 Q100 140 130 150 L140 238Z" fill="#2E7D4F"/>' +
+    '<path d="M70 150 L80 165 L90 150 L100 165 L110 150 L120 165 L130 150 Q100 140 70 150Z" fill="#B3262E"/>' +
+    '<rect x="64" y="200" width="72" height="9" fill="#3B2A1A"/><rect x="94" y="198" width="12" height="13" rx="2" fill="#E3B341"/>' +
+    '<path d="M70 160 L42 200 L50 206 L76 176Z" fill="#2E7D4F"/><circle cx="44" cy="205" r="8" fill="#E9B99A"/>' +
+    '<g class="arm"><path d="M128 158 L160 126 L167 134 L124 178Z" fill="#2E7D4F"/><circle cx="164" cy="127" r="8" fill="#E9B99A"/></g>' +
+    '<path d="M62 96 L36 78 L62 114Z M138 96 L164 78 L138 114Z" fill="#E9B99A"/>' +
+    '<g transform="rotate(-6 100 100)"><image href="behnosh.jpg" x="58" y="48" width="84" height="104" clip-path="url(#ansikte)" preserveAspectRatio="xMidYMid slice"/>' +
+    '<rect x="52" y="60" width="26" height="9" fill="rgba(240,230,200,.85)" transform="rotate(-35 65 64)"/>' +
+    '<rect x="122" y="128" width="26" height="9" fill="rgba(240,230,200,.85)" transform="rotate(-35 135 132)"/></g>' +
+    '<g class="tofs"><path d="M56 64 Q100 40 146 60 L122 10 Q112 2 104 8 Z" fill="#2E7D4F"/><circle cx="114" cy="9" r="9" fill="#fff"/></g>' +
+    '<rect x="52" y="56" width="96" height="12" rx="6" fill="#fff"/>' +
+    '</svg>';
+  function visaKort() {
+    tom();
+    var kort = el('div', 'kortet');
+    kort.innerHTML = ALV;
+    kort.appendChild(el('div', 'hh', 'Happy Holidays!'));
+    kort.appendChild(el('p', null, 'It’s been yet another weird, weird year which makes me even more grateful to have you all as my friends through it all. Wishing you Happy Holidays and an awesome New Year, as low on weird as possible.'));
+    kort.appendChild(el('p', null, 'All the hugs!'));
+    kort.appendChild(el('p', 'sign', 'Behnosh'));
+    scen.appendChild(kort);
+    var rad = el('div', 'knapp-rad');
+    var b = knapp('See the 2026 Advent standings');
+    b.addEventListener('click', visaStallning);
+    rad.appendChild(b);
+    scen.appendChild(rad);
+  }
+
+  function visaStallning() {
+    tom();
+    var ruta = el('div', 'stallning-ruta');
+    ruta.appendChild(el('h2', null, 'The 2026 Advent standings'));
+    var tabell = el('div');
+    tabell.appendChild(el('p', 'tryck', 'Loading…'));
+    ruta.appendChild(tabell);
+    scen.appendChild(ruta);
+    hamtaAret().then(function (svar) { Advent.Stallning.rita(tabell, svar); }, function (fel) {
+      tabell.textContent = '';
+      tabell.appendChild(el('p', 'tryck', fel.message));
+    });
+    var tillbaka = el('button', 'lanklik', 'Back to the card');
+    tillbaka.type = 'button';
+    tillbaka.addEventListener('click', visaKort);
+    scen.appendChild(tillbaka);
+  }
+
+  // Svag snö bakom allt.
+  (function () {
+    var sno = $('sno');
+    for (var i = 0; i < 28; i++) {
+      var f = el('i');
+      f.style.left = (Math.random() * 100) + '%';
+      f.style.animationDuration = (9 + Math.random() * 10) + 's';
+      f.style.animationDelay = (-Math.random() * 18) + 's';
+      var st = 3 + Math.random() * 4;
+      f.style.width = f.style.height = st + 'px';
+      sno.appendChild(f);
+    }
+  })();
+
+  function start() {
+    if (!Advent.Resultat.arInkopplad()) { $('status').textContent = 'The scoreboard isn’t connected yet.'; return; }
+    if (!Advent.Resultat.kod() || !namn()) {
+      scen.hidden = true;
+      $('kodruta').hidden = false;
+      Advent.Resultat.tavla($('kodruta'), 1, { vidStatus: function (d) { if (d) location.reload(); } });
+      var h = $('kodruta').querySelector('h2');
+      if (h) h.textContent = 'Who are you?';
+      return;
+    }
+    Advent.markeraOppnad && Advent.markeraOppnad(24);
+    s = Advent.lasa(nyckel(), null) || { steg: 'kuvert' };
+    // Kommer man tillbaka efter provet ligger kortet öppet direkt.
+    if (s.steg === 'kort' || s.steg === 'efter') visaKort();
+    else if (s.steg === 'brev') visaBrev();
+    else visaKuvert();
+  }
+  start();
+})();
+</script>
+</body>
+</html>
