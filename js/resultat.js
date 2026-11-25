@@ -44,7 +44,7 @@
       .then(function (r) { return r.json(); }, function () { throw new Error('Couldn’t reach the scoreboard. Are you online?'); })
       .then(function (svar) {
         if (!svar.ok) {
-          if (svar.fel === 'That code isn’t right.') glomKod();
+          if (svar.fel === 'That code isn’t right.' || svar.fel === 'The code should be 4 digits.') glomKod();
           throw new Error(svar.fel || 'Something went wrong.');
         }
         if (svar.namn) Advent.spara(NAMN_NYCKEL, svar.namn);
@@ -157,7 +157,7 @@
     inmatning.type = 'password';
     inmatning.inputMode = 'numeric';
     inmatning.autocomplete = 'off';
-    inmatning.maxLength = 8;
+    inmatning.maxLength = 4;
     var knapp = el('button', 'knapp', 'Save');
     knapp.type = 'submit';
     var meddelande = el('p', 'tavla-fel');
@@ -170,6 +170,7 @@
       e.preventDefault();
       var v = inmatning.value.trim();
       if (!v) return;
+      if (!/^\d{4}$/.test(v)) { meddelande.textContent = 'The code should be 4 digits.'; return; }
       knapp.disabled = true;
       meddelande.textContent = '';
       loggaIn(v).then(function () { ladda(m); }, function (fel) {
