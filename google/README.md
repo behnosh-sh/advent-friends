@@ -29,7 +29,8 @@ Inget script eller formel kommer åt familjens ark. Dina resultat klistrar du in
 
 ## Säkerhet
 
-- Utan rätt kod gör scriptet ingenting. Efter 10 felaktiga koder på en timme spärras alla försök i en timme (50 den 24–26 december).
+- Utan rätt kod gör scriptet ingenting. Efter 20 felaktiga koder på en timme spärras alla försök i en timme (50 den 24–26 december). En kod i fel format (allt som inte är exakt fyra siffror) räknas inte och fylls aldrig ut med nollor.
+- Om du ändrar scriptet: klistra in hela nya `resultat.gs` i Apps Script, spara, och välj **Distribuera > Hantera distributioner > pennan > Version: Ny version > Distribuera**. Adressen är densamma.
 - Andras resultat för en dag syns bara för den som själv har skickat in den dagen. Från julafton syns allt för alla.
 - Bara det första resultatet per person och dag sparas. Ändringar görs direkt i arket.
 - Behnosh kan inte skicka något i vännernas kalender. Hennes rader kommer bara från fliken Familjen.
