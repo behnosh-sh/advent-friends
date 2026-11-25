@@ -21,7 +21,7 @@ var FLIK_RESULTAT = 'Resultat';
 var FLIK_FAMILJEN = 'Familjen';
 var BEHNOSH = 'Behnosh';            // namnet i fliken Spelare (och i familjens ark)
 var STRECK_DAGAR = [16, 21];     // Kodkryss, Wordle: annat innehåll än familjens
-var MAX_FEL_PER_TIMME = 20;   // första dagen loggar minst fem personer in samtidigt
+var MAX_FEL_PER_TIMME = 10;
 var MAX_FEL_JULAFTON = 50;   // 24–26 december
 var STATUSAR = ['klar', 'gav upp'];
 var MEDALJER = ['', 'guld', 'silver', 'brons'];
@@ -126,10 +126,8 @@ function tavlaForDag(dag, namn, alla, allt) {
 
 // En tom kod (telefonen är inte inloggad) räknas inte som ett fel och väntar inte.
 function vemArDet(kod, spelare) {
-  if (String(kod == null ? '' : kod).trim() === '') return { fel: 'This phone isn’t signed in.' };
-  // Fel format (bokstäver, för få eller för många siffror) räknas inte som ett fel och väntar inte.
-  if (!giltigtFormat(kod)) return { fel: 'The code should be 4 digits.' };
-  kod = String(kod).trim();
+  kod = rensaKod(kod);
+  if (!kod) return { fel: 'This phone isn’t signed in.' };
   var cache = CacheService.getScriptCache();
   var fel = Number(cache.get('fel') || 0);
   if (fel >= maxFel()) return { fel: 'Too many wrong codes. Wait an hour and try again.' };
@@ -213,11 +211,6 @@ function rensaKod(k) {
   k = String(k == null ? '' : k).trim();
   if (/^\d{1,3}$/.test(k)) k = ('0000' + k).slice(-4);
   return /^\d{4,8}$/.test(k) ? k : '';
-}
-
-// Det som skrivs in på telefonen fylls aldrig ut: "12" är fel format, inte "0012".
-function giltigtFormat(k) {
-  return /^\d{4}$/.test(String(k == null ? '' : k).trim());
 }
 
 function giltigDag(d) {
